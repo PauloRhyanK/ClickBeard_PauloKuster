@@ -68,10 +68,29 @@
   max-width: 1920px;
 }
 
+.radioButton{
+  background-color: var(--gray-500);
+  border-radius: 5px;
+  padding: 5px;
+  border: 1px solid var(--gray-400);
+  font: var(--text-sm);
+}
+
+.RBactive{
+  border: 2px solid var(--yeldark);
+}
+.RBactive > label{
+  color: var(--yeldark);
+}
+
 body {
   background: var(--gray-800);
   color: var(--gray-100);
   font-family: Arial, Helvetica, sans-serif;
+}
+
+input[type="radio"]{
+  display: none;
 }
 
 input[type="text"],
@@ -80,7 +99,8 @@ input[type="password"],
 input[type="number"],
 input[type="search"],
 input[type="tel"],
-input[type="url"]{
+input[type="url"],
+input[type="date"]{
   padding: 0.5rem;
   border: 1px solid var(--gray-500);
   border-radius: 0.25rem;
