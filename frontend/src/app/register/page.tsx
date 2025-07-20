@@ -126,9 +126,9 @@ export default function Register() {
                             <select multiple id="appointment_usuas" size={5} value={formData.appointments} onChange={handleAppointmentsChange} className="select">
                                 <option value="Cabelo">Cabelo</option>
                                 <option value="Barba">Barba</option>
-                                <option value="Implante">Implante</option>
                                 <option value="Sobrancelha">Sobrancelha</option>
-                                <option value="Outros">Outros</option>
+                                <option value="Implante">Implante</option>
+                                <option value="Implante">Hidratação</option>
                             </select>
                             <p className="obs-color text-xs	">Segure <code>CTRL</code> para multipla escolha</p>
                             {

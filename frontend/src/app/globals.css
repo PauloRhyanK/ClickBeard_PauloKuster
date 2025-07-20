@@ -83,7 +83,7 @@
 .RBactive{
   border: 2px solid var(--yeldark);
 }
-.RBactive > label{
+.RBactive > legend{
   color: var(--yeldark);
 }
 
