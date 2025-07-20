@@ -49,7 +49,14 @@ export default function Login() {
                         </div>
                         <div className="flex flex-col gap-2">
                             <label className="label" htmlFor="appointment_usuas">Especialidade</label>
-                            <input type="select" name="appointment_usuas" id="appointment_usuas" placeholder="Selecione suas especialidades" />
+                            <select multiple name="appointment_usuas[]" id="appointment_usuas" size={5}>
+                                <option value="Cabelo">Cabelo</option>
+                                <option value="Barba">Barba</option>
+                                <option value="Implante">Implante</option>
+                                <option value="Sobrancelha">Sobrancelha</option>
+                                <option value="Outros">Outros</option>
+                            </select>
+                            <p className="obs-color text-xs	">Segure <code>CTRL</code> para multipla escolha</p> 
                         </div>
                     </div>
 
