@@ -64,6 +64,9 @@ export default function Login() {
                 <div className="flex justify-between">
                     <button className="w-full text-sm" type="submit">Cadastrar</button>
                 </div>
+                <div className="p-sm">
+                   Ja tem conta?<a className="text-sm link mx-2" href="/login">Logar</a>
+                </div>
             </form>
         </main>
 
