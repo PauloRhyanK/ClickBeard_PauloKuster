@@ -2,7 +2,8 @@
 
 import { verifyToken } from "@/lib/auth";
 import { useRouter } from "next/navigation";
-
+import "./dashboard.module.css";
+import NewAppointment from "@/components/NewAppointment";
 
 export default function Dashboard() {
     const token = localStorage.getItem("token");
@@ -15,10 +16,9 @@ export default function Dashboard() {
         return null;
     }
 
-    return (
-        <div className="flex justify-center items-center h-screen">
-            <h1 className="text-2xl font-bold">Bem-vindo ao Dashboard!</h1>
-        </div>
-        
-    );
+    return <>
+    <NewAppointment role={role}/>
+    <div>teste2</div>
+    
+    </>;
 }
