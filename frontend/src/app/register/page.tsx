@@ -1,13 +1,75 @@
-import Image from "next/image";
+"use client";
 
-export default function Login() {
+import axios from "axios";
+import Image from "next/image";
+import { useState } from "react";
+
+export default function Register() {
+    const [formData, setFormData] = useState({
+        name: '',
+        email: '',
+        password: '',
+        type: '',
+        date: '',
+        appointments: [] as string[]
+    });
+
+
+    const updateField = (field: string, value: string | string[]) => {
+        setFormData(prev => ({
+            ...prev,
+            [field]: value
+        }))
+    }
+
+    const handleAppointmentsChange = (e: React.ChangeEvent<HTMLSelectElement>) => {
+        const selectedOptions = Array.from(e.target.selectedOptions, option => option.value);
+        updateField('appointments', selectedOptions);
+    }
+
+    async function handleRegister(e: React.FormEvent) {
+        e.preventDefault();
+        try {
+            if (!formData.name.trim()) {
+                alert("Nome é obrigatório");
+                return;
+            }
+            if (!formData.email.trim()) {
+                alert("Email é obrigatório");
+                return;
+            }
+            if (!formData.password.trim()) {
+                alert("Senha é obrigatória");
+                return;
+            }
+            if (!formData.type) {
+                alert("Selecione o tipo de usuário");
+                return;
+            }
+            await axios.post("/api/register", {
+                name: formData.name.trim(),
+                email: formData.email.trim().toLowerCase(),
+                password: formData.password.trim(),
+                type: formData.type,
+                date: formData.date,
+                appointments: formData.appointments
+            })
+        } catch (error: any) {
+            alert("Erro ao cadastrar: " + error.response?.data?.error || error.message);
+            console.error("Registration failed:", error);
+        }
+    }
+
+    function handleTypeChange(type: string) {
+        updateField("type", type);
+    }
 
     return <>
         <header className="m-5 mt-10">
             <Image className="m-auto" src="/clickbeader_logo.webp" alt="Logo Clickbeard" width={150} height={38} />
         </header>
         <main className="flex justify-center">
-            <form action="" className="main-container window-color m-auto flex flex-col radius-lg p-10 rounded-xl gap-6">
+            <form onSubmit={handleRegister} className="main-container window-color m-auto flex flex-col radius-lg p-10 rounded-xl gap-6 w-300">
                 <section>
                     <h1 className="title-lg ">
                         Cadastro
@@ -18,45 +80,48 @@ export default function Login() {
                     <div className="grid grid-cols-2 gap-6">
                         <div className="flex flex-col gap-2">
                             <label className="label title-md" htmlFor="name_usuas">Nome Completo</label>
-                            <input type="text" name="name_usuas" id="name_usuas" placeholder="Insira seu nome completo" />
+                            <input value={formData.name} onChange={(e) => { updateField("name", e.target.value) }} type="text" name="name_usuas" id="name_usuas" placeholder="Insira seu nome completo" required />
                         </div>
                         <div className="flex flex-col gap-2">
                             <label className="label" htmlFor="password_usuas">Senha</label>
-                            <input type="password" name="password_usuas" id="password_usuas" placeholder="Insira sua Senha" />
+                            <input value={formData.password} onChange={(e) => { updateField("password", e.target.value) }} type="password" name="password_usuas" id="password_usuas" placeholder="Insira sua Senha" required/>
                         </div>
                     </div>
                     <div className="flex flex-col gap-2">
                         <label className="label" htmlFor="email_usuas">Email</label>
-                        <input type="email" name="email_usuas" id="email_usuas" placeholder="Insira seu Email" />
+                        <input value={formData.email} onChange={(e) => { updateField("email", e.target.value) }} type="email" name="email_usuas" id="email_usuas" placeholder="Insira seu Email" required/>
                     </div>
                     <div className="flex flex-col gap-2">
-                        <label className="label" htmlFor="type_usuas">Tipo de Cadastro</label>
+                        <legend className="label">Tipo de Cadastro</legend>
                         <div className="grid grid-cols-2 gap-6">
-                            <div className="radioButton RBactive flex items-center gap-2 justify-center">
-                                <input type="radio" name="type_usuas" id="barber" value="Barbeiro" />
-                                <label htmlFor="barber" className="label">Barbeiro</label>
+                            <div onClick={() => handleTypeChange("barber")} className={`radioButton ${formData.type === "barber" ? "RBactive" : ""} flex items-center gap-2 justify-center`}>
+                                <legend className="label">Barbeiro</legend>
                             </div>
-                            <div className="radioButton flex items-center gap-2 justify-center">
-                                <input type="radio" name="type_usuas" id="client" value="Cliente" />
-                                <label htmlFor="client" className="label">Cliente</label>
+                            <div onClick={() => handleTypeChange("client")} className={`radioButton ${formData.type === "client" ? "RBactive" : ""} flex items-center gap-2 justify-center`}>
+                                <legend className="label">Cliente</legend>
                             </div>
                         </div>
                     </div>
                     <div className="grid grid-cols-2 gap-6">
                         <div className="flex flex-col gap-2">
                             <label className="label title-md" htmlFor="date_usuas">Data de Nascimento</label>
-                            <input type="date" name="date_usuas" id="date_usuas" placeholder="Selecione sua Data de Nascimento" />
+                            <input onChange={(e) => { updateField("date", e.target.value) }} type="date" name="date_usuas" id="date_usuas" placeholder="Selecione sua Data de Nascimento" />
                         </div>
                         <div className="flex flex-col gap-2">
                             <label className="label" htmlFor="appointment_usuas">Especialidade</label>
-                            <select multiple name="appointment_usuas[]" id="appointment_usuas" size={5}>
+                            <select multiple id="appointment_usuas" size={5} value={formData.appointments} onChange={handleAppointmentsChange} className="select">
                                 <option value="Cabelo">Cabelo</option>
                                 <option value="Barba">Barba</option>
                                 <option value="Implante">Implante</option>
                                 <option value="Sobrancelha">Sobrancelha</option>
                                 <option value="Outros">Outros</option>
                             </select>
-                            <p className="obs-color text-xs	">Segure <code>CTRL</code> para multipla escolha</p> 
+                            <p className="obs-color text-xs	">Segure <code>CTRL</code> para multipla escolha</p>
+                            {
+                                formData.appointments.length > 0 && (
+                                    <p className="text-xs">Especialidades selecionadas: {formData.appointments.join(', ')}</p>
+                                )
+                            }
                         </div>
                     </div>
 
@@ -65,7 +130,7 @@ export default function Login() {
                     <button className="w-full text-sm" type="submit">Cadastrar</button>
                 </div>
                 <div className="p-sm">
-                   Ja tem conta?<a className="text-sm link mx-2" href="/login">Logar</a>
+                    Ja tem conta?<a className="text-sm link mx-2" href="/login">Logar</a>
                 </div>
             </form>
         </main>
