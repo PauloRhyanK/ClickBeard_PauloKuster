@@ -33,3 +33,13 @@ export async function loginUser(email: string, password: string) {
         throw new Error("Login request failed: " + (error.response?.data?.error || error.message));
     }
 }
+
+export async function verifyToken(token: string, user: string, role: string ): Promise<boolean> {
+    try {
+        const res = await axios.post("/api/token", { token, user, role });
+        return res.data.valid;
+    } catch (error) {
+        console.error("Token verification failed:", error);
+        return false;
+    }
+}

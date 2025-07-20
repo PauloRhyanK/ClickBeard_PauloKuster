@@ -14,8 +14,7 @@ export default function Login() {
         e.preventDefault();
         try{    
             await loginUser(email, password); 
-            //router.push('/dashboard');
-            alert("Login successful!"); 
+            router.push('/dashboard');
         } catch (error) {
             alert(error);
             console.error("Login failed:", error);
