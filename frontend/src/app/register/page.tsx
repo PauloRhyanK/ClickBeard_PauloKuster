@@ -46,7 +46,8 @@ export default function Register() {
                 alert("Selecione o tipo de usuário");
                 return;
             }
-            await axios.post("/api/register", {
+            alert("Registrando usuário...");
+            const res = await axios.post("/api/register", {
                 name: formData.name.trim(),
                 email: formData.email.trim().toLowerCase(),
                 password: formData.password.trim(),
@@ -54,6 +55,19 @@ export default function Register() {
                 date: formData.date,
                 appointments: formData.appointments
             })
+            if (res.status >= 200 && res.status < 300) {
+                alert("Cadastro realizado com sucesso!");
+                setFormData({
+                    name: '',
+                    email: '',
+                    password: '',
+                    type: '',
+                    date: '',
+                    appointments: []
+                });
+            } else {
+                alert("Erro ao cadastrar usuário");
+            }
         } catch (error: any) {
             alert("Erro ao cadastrar: " + error.response?.data?.error || error.message);
             console.error("Registration failed:", error);
