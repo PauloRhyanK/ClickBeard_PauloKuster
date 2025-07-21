@@ -87,6 +87,51 @@
   color: var(--yeldark);
 }
 
+.hour {
+  width: 4.9rem;
+  height: 2.5rem;
+
+  border-radius: 0.5rem;
+
+  font-size: 0.90rem;
+  border: 1px solid #3e3c41;
+
+  cursor: pointer;
+
+  display: flex;
+  justify-content: center;
+  align-items: center;
+}
+
+.hour-period {
+  grid-column: span 4;
+  width: 100%;
+  color: #98959d;
+  font-size: 0.87rem;
+
+  margin-top: 0.75rem;
+}
+
+.hour-available {
+  background-color: #2e2c30;
+}
+
+.hour-unavailable {
+  opacity: 0.5;
+
+  cursor: not-allowed;
+}
+
+.hour-selected {
+  border: 1px solid #b8952e;
+  color: #b8952e;
+}
+
+.hour:not(.hour-unavailable):not(.hour-selected):hover {
+  border: 1px solid #fff7db;
+  color: #fff7db;
+}
+
 body {
   background: var(--gray-800);
   color: var(--gray-100);
@@ -104,7 +149,8 @@ input[type="number"],
 input[type="search"],
 input[type="tel"],
 input[type="url"],
-input[type="date"]{
+input[type="date"],
+select{
   padding: 0.5rem;
   border: 1px solid var(--gray-500);
   border-radius: 0.25rem;
