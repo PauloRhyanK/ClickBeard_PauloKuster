@@ -1,4 +1,5 @@
 import { fetchAvailableHours, fetchNewAppointment, BarberSlot, HourSlot } from "@/lib/appoitmentService";
+import { fetchClients, Client } from "@/lib/clientService";
 import React, { useState, useEffect } from "react";
 import HoursApointment from "./HoursApointment";
 
@@ -7,13 +8,13 @@ interface NewAppointmentProps {
 }
 
 const NewAppointment: React.FC<NewAppointmentProps> = ({ role }) => {
-    const userRole = role;
+    const userRole = role;  
     const [hours, setHours] = useState<HourSlot[]>([]);
     const [barbers, setBarbers] = useState<BarberSlot[]>([]);
     const [allBarbers, setAllBarbers] = useState<BarberSlot[]>([]);
     const [specialities, setSpecialities] = useState<string[]>([]);
     const [date, setDate] = useState<Date>(new Date());
-    const [clients, setClients] = useState<string>("");
+    const [clients, setClients] = useState<Client[]>([]);
 
     const [speciality, setSpeciality] = useState<string>("");
     const [selectedBarber, setSelectedBarber] = useState<string>("");
@@ -22,6 +23,21 @@ const NewAppointment: React.FC<NewAppointmentProps> = ({ role }) => {
 
     const token = localStorage.getItem("token");
     const user = localStorage.getItem("user");
+
+
+    useEffect(() => {
+        const fetchData = async () => {
+            if (userRole === "admin" || userRole === "barber") {
+                try {
+                    const clientsData = await fetchClients(token || "");
+                    setClients(clientsData);
+                } catch (error) {
+                    console.error("Erro ao buscar clientes:", error);
+                }
+            }
+        };
+        fetchData();
+    }, [token, userRole]);
 
     const getAllSpecialities = (barbersList: BarberSlot[]): string[] => {
         const allSpecs = new Set<string>();
@@ -97,7 +113,7 @@ const NewAppointment: React.FC<NewAppointmentProps> = ({ role }) => {
         };
         
         fetchData();
-    }, [date, userRole]);
+    }, [date, userRole, token, user]);
 
     const resetFilters = () => {
         setSpeciality("");
@@ -123,6 +139,10 @@ const NewAppointment: React.FC<NewAppointmentProps> = ({ role }) => {
             alert("Selecione uma especialidade");
             return;
         }
+        if ((userRole === "admin" || userRole === "barber") && !client) {
+            alert("Selecione um cliente");
+            return;
+        }
 
         const appointmentData = {
             date: date.toISOString().split('T')[0],
@@ -130,7 +150,7 @@ const NewAppointment: React.FC<NewAppointmentProps> = ({ role }) => {
             barber: selectedBarber,
             speciality: speciality,
             role: userRole,
-            ...(client && { client }) 
+            ...(client && { client })
         };
 
         try {
@@ -139,6 +159,7 @@ const NewAppointment: React.FC<NewAppointmentProps> = ({ role }) => {
             if (resp.success) {
                 alert("Agendamento criado com sucesso!");
                 resetFilters();
+                setClient(""); 
             } else {
                 alert(resp.message || "Erro ao criar agendamento");
             }
@@ -214,11 +235,19 @@ const NewAppointment: React.FC<NewAppointmentProps> = ({ role }) => {
                 {(userRole === "admin" || userRole === "barber") && (
                     <div className="flex flex-col gap-2">
                         <label htmlFor="client">Selecione o cliente</label>
-                        <select name="client" id="client">
-                            <option value="">Selecione...</option>
-                            <option value="fulano">Fulano</option>
-                            <option value="ciclano">Ciclano</option>
-                            <option value="beltrano">Beltrano</option>
+                        <select 
+                            name="client" 
+                            id="client"
+                            value={client}
+                            onChange={(e) => setClient(e.target.value)}
+                            required={userRole === "admin" || userRole === "barber"}
+                        >
+                            <option value="">Selecione um cliente...</option>
+                            {clients.map((clientItem, key) => (
+                                <option key={key} value={clientItem.id}>
+                                    {clientItem.name}
+                                </option>
+                            ))}
                         </select>
                     </div>
                 )}
