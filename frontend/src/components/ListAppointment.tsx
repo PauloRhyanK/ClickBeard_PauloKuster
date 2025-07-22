@@ -1,50 +1,53 @@
 import { fetchAppointments } from "@/lib/appoitmentService";
-import { AppointmentData } from "@/types";
+import { AppointmentData, NewAppointmentResponse } from "@/types";
 import { useEffect, useState } from "react";
 
 const ListAppointment = ({ role }: { role: string }) => {
     const isClient = role === "client";
     const isBarber = role === "barber";
     const isAdmin = role === "admin";
-    
+
     const [appointments, setAppointments] = useState<AppointmentData[]>([]);
     const [historical, setHistorical] = useState<AppointmentData[]>([]);
+    const [selectedDate, setSelectedDate] = useState<string>(new Date().toISOString().split('T')[0]);
 
     useEffect(() => {
         const fetchData = async () => {
             try {
                 const response = await fetchAppointments(role);
                 const today = new Date();
-                today.setHours(0, 0, 0, 0); // Zerar horas para comparar apenas a data
-                
+                today.setHours(0, 0, 0, 0);
                 const futureAppointments: AppointmentData[] = [];
                 const pastAppointments: AppointmentData[] = [];
-                
-                response.forEach((appointment) => {
-                    const appointmentDate = new Date(appointment.date);
-                    appointmentDate.setHours(0, 0, 0, 0);
-                    
-                    if (appointmentDate >= today) {
-                        futureAppointments.push(appointment);
-                    } else {
-                        pastAppointments.push(appointment);
-                    }
-                });
-                
-                setAppointments(futureAppointments);
-                setHistorical(pastAppointments);
+
+                if (isBarber || isAdmin) {
+                    setAppointments(response as AppointmentData[]); return;
+                } else if (isClient) {
+                    response.forEach((appointment) => {
+                        const appointmentDate = new Date(appointment.date);
+                        appointmentDate.setHours(0, 0, 0, 0);
+
+                        if (appointmentDate >= today) {
+                            futureAppointments.push(appointment);
+                        } else {
+                            pastAppointments.push(appointment);
+                        }
+                    });
+                    setAppointments(futureAppointments);
+                    setHistorical(pastAppointments);
+                }
             } catch (error) {
                 console.error("Error fetching appointments:", error);
             }
-        };        
+        };
         fetchData();
     }, [role]);
 
     const formatDate = (dateString: string) => {
         const date = new Date(dateString);
-        return date.toLocaleDateString('pt-BR', { 
-            day: 'numeric', 
-            month: 'long' 
+        return date.toLocaleDateString('pt-BR', {
+            day: 'numeric',
+            month: 'long'
         });
     };
 
@@ -77,7 +80,7 @@ const ListAppointment = ({ role }: { role: string }) => {
                         )}
                     </ul>
                 </section>
-                
+
                 <section className="pr-10 pl-20">
                     <div className="flex justify-between items-end pt-20 pb-10">
                         <div className="flex flex-col items-start">
@@ -114,7 +117,7 @@ const ListAppointment = ({ role }: { role: string }) => {
                 afternoon: [] as AppointmentData[],
                 night: [] as AppointmentData[]
             };
-            
+
             appointments.forEach(appointment => {
                 const hour = parseInt(appointment.hour.split(':')[0]);
                 if (hour < 12) {
@@ -125,102 +128,109 @@ const ListAppointment = ({ role }: { role: string }) => {
                     periods.night.push(appointment);
                 }
             });
-            
+
             return periods;
         };
 
         const groupedAppointments = groupAppointmentsByPeriod(appointments);
-        
+
         return (
-            <section className="pr-10 pl-20">
-                <div className="flex justify-between items-end pt-20 pb-10">
-                    <div className="flex flex-col items-start">
-                        <h2 className="title-lg">{isBarber ? "Seus atendimentos" : "Agendamentos"}</h2>
-                        <p className="p-sm subt-color">Aqui você pode visualizar os horários marcados.</p>
+            <div>
+                <section className="pr-10 pl-20">
+                    <div className="flex justify-between items-end pt-20 pb-10">
+                        <div className="flex flex-col items-start">
+                            <h2 className="title-lg">{isBarber ? "Seus atendimentos" : "Agendamentos"}</h2>
+                            <p className="p-sm subt-color">Aqui você pode visualizar os horários marcados.</p>
+                        </div>
+                        <div className="flex gap-4 items-center">
+                            <input
+                                type="date"
+                                name="appointmentDate"
+                                id="appointmentDate"
+                                value={selectedDate}
+                                onChange={(e) => setSelectedDate(e.target.value)}
+                            />
+                        </div>
                     </div>
-                    <input type="date" name="appointmentDate" id="appointmentDate" />
-                </div>
-                <ul>
-                    {groupedAppointments.morning.length > 0 && (
-                        <li className={(role === "barber" ? "itemAppointmentBarber" : "itemAppointmentAdmin") + " flex flex-col mb-5 pb-10"}>
-                            <div className="itemHeader flex justify-between items-center p-md p-5">
-                                <span>
-                                    <img src="/icon/morning.svg" alt="Print" className="inline-block w-6 h-6 mr-2" />
-                                    Manhã
-                                </span>
-                                <span>08h-12h</span>
-                            </div>
-                            {groupedAppointments.morning.map((appointment, index) => (
-                                <div key={index} className="itemData p-md pt-10 pl-7 pr-7">
-                                    <strong>{appointment.hour}</strong>
-                                    <span className="">{appointment.client || "Cliente"}</span>
-                                    <span>{appointment.speciality}</span>
-                                    {role === "admin" && (
-                                        <>
-                                            <span>{appointment.barber}</span>
-                                            <strong className="close flex justify-end">X</strong>
-                                        </>
-                                    )}
+
+                    <ul>
+                        {groupedAppointments.morning.length > 0 && (
+                            <li className={(role === "barber" ? "itemAppointmentBarber" : "itemAppointmentAdmin") + " flex flex-col mb-5 pb-10"}>
+                                <div className="itemHeader flex justify-between items-center p-md p-5">
+                                    <span>
+                                        <img src="/icon/morning.svg" alt="Print" className="inline-block w-6 h-6 mr-2" />
+                                        Manhã
+                                    </span>
+                                    <span>08h-12h</span>
                                 </div>
-                            ))}
-                        </li>
-                    )}
-                    
-                    {groupedAppointments.afternoon.length > 0 && (
-                        <li className={(role === "barber" ? "itemAppointmentBarber" : "itemAppointmentAdmin") + " flex flex-col mb-5 pb-10"}>
-                            <div className="itemHeader flex justify-between items-center p-md p-5">
-                                <span>
-                                    <img src="/icon/afternoon.svg" alt="Print" className="inline-block w-6 h-6 mr-2" />
-                                    Tarde
-                                </span>
-                                <span>12h-18h</span>
-                            </div>
-                            {groupedAppointments.afternoon.map((appointment, index) => (
-                                <div key={index} className="itemData p-md pt-10 pl-7 pr-7">
-                                    <strong>{appointment.hour}</strong>
-                                    <span className="">{appointment.client || "Cliente"}</span>
-                                    <span>{appointment.speciality}</span>
-                                    {role === "admin" && (
-                                        <>
-                                            <span>{appointment.barber}</span>
-                                            <strong className="close flex justify-end">X</strong>
-                                        </>
-                                    )}
+                                {groupedAppointments.morning.map((appointment, index) => (
+                                    <div key={index} className="itemData p-md pt-10 pl-7 pr-7">
+                                        <strong>{appointment.hour}</strong>
+                                        <span className="">{appointment.client || "Cliente"}</span>
+                                        <span>{appointment.speciality}</span>
+                                        {role === "admin" && (
+                                            <>
+                                                <span>{appointment.barber}</span>
+                                                <strong className="close flex justify-end">X</strong>
+                                            </>
+                                        )}
+                                    </div>
+                                ))}
+                            </li>
+                        )}
+
+                        {groupedAppointments.afternoon.length > 0 && (
+                            <li className={(role === "barber" ? "itemAppointmentBarber" : "itemAppointmentAdmin") + " flex flex-col mb-5 pb-10"}>
+                                <div className="itemHeader flex justify-between items-center p-md p-5">
+                                    <span>
+                                        <img src="/icon/afternoon.svg" alt="Print" className="inline-block w-6 h-6 mr-2" />
+                                        Tarde
+                                    </span>
+                                    <span>12h-18h</span>
                                 </div>
-                            ))}
-                        </li>
-                    )}
-                    
-                    {groupedAppointments.night.length > 0 && (
-                        <li className={(role === "barber" ? "itemAppointmentBarber" : "itemAppointmentAdmin") + " flex flex-col mb-5 pb-10"}>
-                            <div className="itemHeader flex justify-between items-center p-md p-5">
-                                <span>
-                                    <img src="/icon/night.svg" alt="Print" className="inline-block w-6 h-6 mr-2" />
-                                    Noite
-                                </span>
-                                <span>18h-22h</span>
-                            </div>
-                            {groupedAppointments.night.map((appointment, index) => (
-                                <div key={index} className="itemData p-md pt-10 pl-7 pr-7">
-                                    <strong>{appointment.hour}</strong>
-                                    <span className="">{appointment.client || "Cliente"}</span>
-                                    <span>{appointment.speciality}</span>
-                                    {role === "admin" && (
-                                        <>
-                                            <span>{appointment.barber}</span>
-                                            <strong className="close flex justify-end">X</strong>
-                                        </>
-                                    )}
+                                {groupedAppointments.afternoon.map((appointment, index) => (
+                                    <div key={index} className="itemData p-md pt-10 pl-7 pr-7">
+                                        <strong>{appointment.hour}</strong>
+                                        <span className="">{appointment.client || "Cliente"}</span>
+                                        <span>{appointment.speciality}</span>
+                                        {role === "admin" && (
+                                            <>
+                                                <span>{appointment.barber}</span>
+                                                <strong className="close flex justify-end">X</strong>
+                                            </>
+                                        )}
+                                    </div>
+                                ))}
+                            </li>
+                        )}
+
+                        {groupedAppointments.night.length > 0 && (
+                            <li className={(role === "barber" ? "itemAppointmentBarber" : "itemAppointmentAdmin") + " flex flex-col mb-5 pb-10"}>
+                                <div className="itemHeader flex justify-between items-center p-md p-5">
+                                    <span>
+                                        <img src="/icon/night.svg" alt="Print" className="inline-block w-6 h-6 mr-2" />
+                                        Noite
+                                    </span>
+                                    <span>18h-22h</span>
                                 </div>
-                            ))}
-                        </li>
-                    )}
-                    
-                    {appointments.length === 0 && (
-                        <p className="p-md">Nenhum agendamento encontrado.</p>
-                    )}
-                </ul>
-            </section>
+                                {groupedAppointments.night.map((appointment, index) => (
+                                    <div key={index} className="itemData p-md pt-10 pl-7 pr-7">
+                                        <strong>{appointment.hour}</strong>
+                                        <span className="">{appointment.client || "Cliente"}</span>
+                                        <span>{appointment.speciality}</span>
+                                        {role === "admin" && (
+                                            <>
+                                                <span>{appointment.barber}</span>
+                                                <strong className="close flex justify-end">X</strong>
+                                            </>
+                                        )}
+                                    </div>
+                                ))}
+                            </li>
+                        )}
+                    </ul>
+                </section>
+            </div>
         );
     }
 

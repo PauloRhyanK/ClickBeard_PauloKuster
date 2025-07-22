@@ -21,7 +21,7 @@ export interface BarberSlot {
 export interface NewAppointmentResponse {
     date: string;
     barbers: BarberSlot[];
-    hoursDay: HourSlot[];
+    hoursDay?: HourSlot[];
 }
 
 export interface CreateAppointmentData {
