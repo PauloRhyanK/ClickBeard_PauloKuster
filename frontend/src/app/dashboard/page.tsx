@@ -17,10 +17,13 @@ export default function Dashboard() {
     }
 
     return (
+        <>
+        <img className="absolute w-50 h-13 top-2 left-2" src="/clickbeader_logo.webp" alt="ClickBeader Logo" />
         <div className="dashboardContainer">
             <NewAppointment role={role} />
             <ListAppointment role={role} />
         </div>
+        </>
     )
 
 }
