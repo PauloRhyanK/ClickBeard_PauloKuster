@@ -15,7 +15,7 @@ export async function GET(request: NextRequest) {
         }
 
         const formattedDate = date ? new Date(date).toISOString().slice(0, 10) : "";
-        let baseUrl = 'http://localhost:3002/schedule?date=' + formattedDate ;     
+        let baseUrl = 'http://localhost:3002/dashboard?date=' + formattedDate ;     
         baseUrl += `&barber_id=${user}&role=${role}`;
         const response = await axios.get(baseUrl, {
             headers: {
@@ -27,7 +27,7 @@ export async function GET(request: NextRequest) {
         }
         return NextResponse.json({ error: "Failed to fetch hours" }, { status: response.status });
     } catch (error: any) {
-        console.error("Error fetching hours:", error);
+        console.error(`Status: ${(error as any).status} Error fetching hours:`, error);
         return NextResponse.json({ error: "Internal server error" }, { status: 500 });
     }
 }

@@ -70,7 +70,7 @@ export default function HoursApointment({ hours, setHour, selectedHour }: HoursA
                             {currentPeriod.isTitle && (
                                 <li 
                                     key={`header-${index}`} 
-                                    className={`hour-period ${currentPeriod.class} col-span-4 text-center py-2 font-semibold`}
+                                    className={`hour-period ${currentPeriod.class} col-span-4 py-2 font-semibold`}
                                 >
                                     {currentPeriod.name}
                                 </li>

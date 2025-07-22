@@ -225,6 +225,19 @@ select{
   font-family: var(--font-family);
 }
 
+input[type="text"]:focus,
+input[type="email"]:focus,
+input[type="password"]:focus,
+input[type="number"]:focus,
+input[type="search"]:focus, 
+
+input[type="button"]{
+  border: solid 1px var(--gray-300);
+  border-radius: 0.125rem;
+  cursor: pointer;
+  font-weight: bolder;
+}
+
 button[type="submit"]{
   padding: 0.5rem 1rem;
   background-color: var(--yell);

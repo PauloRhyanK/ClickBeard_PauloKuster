@@ -1,83 +1,222 @@
-import { fetchAvailableHours } from "@/lib/hoursService";
-import React, { useState,useEffect } from "react";
+import { fetchAvailableHours, BarberSlot, HourSlot } from "@/lib/hoursService";
+import React, { useState, useEffect } from "react";
 import HoursApointment from "./HoursApointment";
 
 interface NewAppointmentProps {
     role: string;
 }
 
-interface HoursAppointment{
-    hour: string;
-    selected: boolean;
-}
-
 const NewAppointment: React.FC<NewAppointmentProps> = ({ role }) => {
     const userRole = role;
-    const [hours, setHours] = useState<HoursAppointment[]>([]);
+    const [hours, setHours] = useState<HourSlot[]>([]);
+    const [barbers, setBarbers] = useState<BarberSlot[]>([]);
+    const [allBarbers, setAllBarbers] = useState<BarberSlot[]>([]);
+    const [specialities, setSpecialities] = useState<string[]>([]);
+    const [date, setDate] = useState<Date>(new Date());
+
+    const [speciality, setSpeciality] = useState<string>("");
+    const [selectedBarber, setSelectedBarber] = useState<string>("");
+    const [hoursSelected, setHoursSelected] = useState<string>("");
+
     const token = localStorage.getItem("token");
     const user = localStorage.getItem("user");
 
-    // const addHour = (hour: HoursAppointment) => {
-    //     setHours(prevHours => ([
-    //         ...prevHours,
-    //         hour
-    //     ]));
-    // }
+    const getAllSpecialities = (barbersList: BarberSlot[]): string[] => {
+        const allSpecs = new Set<string>();
+        barbersList.forEach(barber => {
+            if (Array.isArray(barber.specialities)) {
+                barber.specialities.forEach(spec => allSpecs.add(spec));
+            }
+        });
+        return Array.from(allSpecs);
+    };
+
+    const isBarberAvailable = (barber: BarberSlot, targetHour: string): boolean => {
+        if (!Array.isArray(barber.hours)) return true;
+        const reservedHour = barber.hours.find(h => h.hour === targetHour);
+        return !reservedHour || !reservedHour.selected;
+    };
 
     useEffect(() => {
-        const fetchHours = async () => {
+        let filteredBarbers = [...allBarbers];
+        let availableSpecialities: string[] = [];
+        if (selectedBarber) {
+            const barber = allBarbers.find(b => b.name === selectedBarber);
+            if (barber) {
+                setSpecialities(barber.specialities || []);
+                setBarbers([barber]); 
+                return;
+            }
+        }
+        if (speciality) {
+            filteredBarbers = filteredBarbers.filter(barber =>
+                Array.isArray(barber.specialities) &&
+                barber.specialities.includes(speciality)
+            );
+        }
+        if (hoursSelected) {
+            filteredBarbers = filteredBarbers.filter(barber => 
+                isBarberAvailable(barber, hoursSelected)
+            );
+        }
+        availableSpecialities = getAllSpecialities(filteredBarbers);
+        setBarbers(filteredBarbers);
+        setSpecialities(availableSpecialities);
+    }, [speciality, selectedBarber, hoursSelected, allBarbers]);
+
+    useEffect(() => {
+        const fetchData = async () => {
             try {
-                const availableHours = await fetchAvailableHours({ date: new Date().toISOString(), token: token || "", user: user || "", role: userRole });
-                const resp = availableHours.hoursDay.map(hour => ({ hour: hour.hour, selected: hour.selected }));
-                setHours(resp);
-                console.log("Available hours:", resp);
+                const availableHours = await fetchAvailableHours({ 
+                    date: date.toISOString(), 
+                    token: token || "", 
+                    user: user || "", 
+                    role: userRole 
+                });
+                const allHours = availableHours.hoursDay.map(hour => ({
+                    hour: hour.hour,
+                    selected: hour.selected
+                }));
+                const allBarbersData = availableHours.barbers.map(barber => ({
+                    name: barber.name,
+                    specialities: barber.specialities || [],
+                    hours: barber.hours || [] 
+                }));
+                setHours(allHours);
+                setAllBarbers(allBarbersData);
+                setBarbers(allBarbersData);
+                
+                const allSpecs = getAllSpecialities(allBarbersData);
+                setSpecialities(allSpecs);
+
             } catch (error) {
-                console.error("Failed to fetch available hours:", error);
+                console.error("Erro ao buscar dados:", error);
             }
         };
-        fetchHours();
-    }, [token, user, userRole]);
+        
+        fetchData();
+    }, [date, userRole]);
+
+    const resetFilters = () => {
+        setSpeciality("");
+        setSelectedBarber("");
+        setHoursSelected("");
+    };
+
+    const handleSubmit = (e: React.FormEvent) => {
+        e.preventDefault();
+        
+        if (!hoursSelected) {
+            alert("Selecione um horário");
+            return;
+        }
+        
+        if (!selectedBarber) {
+            alert("Selecione um barbeiro");
+            return;
+        }
+
+        const appointmentData = {
+            date: date.toISOString().split('T')[0],
+            hour: hoursSelected,
+            barber: selectedBarber,
+            speciality: speciality,
+            role: userRole
+        };
+    };
 
     return (
         <div className="window-color m-3 rounded-2xl flex flex-col items-center justify-center new-appointment-container pt-20 pb-10 pr-10 pl-10">
             <div className="flex flex-col items-start">
                 <h2 className="title-lg">Agende um atendimento</h2>
-                <p className="p-sm subt-color">Selecione data, hoário e informe o nome do barbeiro para criar o agendamento</p>
-            </div>  
-            <form className="flex flex-col gap-5 w-full max-w-md mt-6">
+                <p className="p-sm subt-color">Selecione data, horário e informe o nome do barbeiro para criar o agendamento</p>
+            </div>
+
+            <form onSubmit={handleSubmit} className="flex flex-col gap-5 w-full max-w-md mt-6">
                 <div className="flex flex-col gap-2 w-full">
                     <label htmlFor="appointmentDate" className="label">Data</label>
-                    <input className="w-full" type="date" id="appointmentDate" name="appointmentDate" required />
+                    <input 
+                        onChange={(e) => setDate(new Date(e.target.value))} 
+                        className="w-full" 
+                        type="date" 
+                        id="appointmentDate" 
+                        name="appointmentDate"
+                        min={new Date().toISOString().split('T')[0]}
+                        required 
+                    />
                 </div>
+
                 <div className="flex flex-col gap-2">
-                    <HoursApointment hours={hours} setHours={setHours} />
+                    <HoursApointment 
+                        hours={hours} 
+                        setHour={setHoursSelected} 
+                        selectedHour={hoursSelected} 
+                    />
                 </div>
+
                 <div className="flex flex-col gap-2">
                     <label htmlFor="specialities">Selecione a especialidade</label>
-                    <select name="specilities" id="specilities">
-                        <option value="beard">Barba</option>
-                        <option value="hair">Cabelo</option>
-                        <option value="manicure">Manicure</option>
+                    <select 
+                        onChange={(e) => setSpeciality(e.target.value)} 
+                        name="specialities" 
+                        id="specialities"
+                        value={speciality}
+                    >
+                        <option value="">Todas as especialidades</option>
+                        {specialities.map((spec, index) => (
+                            <option key={index} value={spec}>
+                                {spec.charAt(0).toUpperCase() + spec.slice(1)}
+                            </option>
+                        ))}
                     </select>
                 </div>
+
                 <div className="flex flex-col gap-2">
                     <label htmlFor="barber">Selecione o barbeiro</label>
-                    <select name="barber" id="barber">
-                        <option value="fulano">fulano</option>
-                        <option value="ciclano">ciclano</option>
-                        <option value="beltrano">beltrano</option>
+                    <select 
+                        onChange={(e) => setSelectedBarber(e.target.value)} 
+                        name="barber" 
+                        id="barber"
+                        value={selectedBarber}
+                    >
+                        <option value="">Todos os barbeiros</option>
+                        {barbers.map((barber, index) => (
+                            <option key={index} value={barber.name}>
+                                {barber.name}
+                            </option>
+                        ))}
                     </select>
                 </div>
-                <div className="flex flex-col gap-2">
-                    <label htmlFor="client">Selecione o cliente</label>
-                    <select name="client" id="client">
-                        <option value="fulano">fulano</option>
-                        <option value="ciclano">ciclano</option>
-                        <option value="beltrano">beltrano</option>
-                    </select>
+
+                {userRole === "admin" && (
+                    <div className="flex flex-col gap-2">
+                        <label htmlFor="client">Selecione o cliente</label>
+                        <select name="client" id="client">
+                            <option value="">Selecione...</option>
+                            <option value="fulano">Fulano</option>
+                            <option value="ciclano">Ciclano</option>
+                            <option value="beltrano">Beltrano</option>
+                        </select>
+                    </div>
+                )}
+
+                <div className="flex gap-2">
+                    <button 
+                        type="button" 
+                        onClick={resetFilters} 
+                        className="btn-secondary flex-1 border"
+                    >
+                        Limpar
+                    </button>
+                    <button 
+                        type="submit" 
+                        className="btn-submit flex-1"
+                        disabled={!hoursSelected || !selectedBarber}
+                    >
+                        Agendar
+                    </button>
                 </div>
-                <button type="submit" className="btn-submit">Agendar</button>
-           </form>
+            </form>
         </div>
     );
 }

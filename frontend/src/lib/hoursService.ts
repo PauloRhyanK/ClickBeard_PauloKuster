@@ -1,26 +1,27 @@
 import axios from "axios";
 
-export interface HourSlot{
-    hour: string;
-    selected: boolean;
-}
-
-export interface specialitySlot{
-    id: string;
-    name: string;
-}
-
-export interface HourRequest {
+interface HourRequest {
     date: string;
     token: string;
     user: string;
     role: string;
 }
+export interface HourSlot {
+    hour: string;
+    selected: boolean;
+}
+
+export interface BarberSlot {
+    name: string;
+    specialities: string[];
+    hours: HourSlot[];
+}
+
 
 export interface NewAppointmentResponse {
-    hoursDay: HourSlot[];
     date: string;
-    specialities: specialitySlot[];
+    barbers: BarberSlot[];
+    hoursDay: HourSlot[];
 }
 
 export async function fetchAvailableHours({ date, token, user, role }: HourRequest): Promise<NewAppointmentResponse> {
@@ -32,9 +33,6 @@ export async function fetchAvailableHours({ date, token, user, role }: HourReque
     }
     if (!user) {
         throw new Error("User is required");
-    }
-    if (!role) {
-        throw new Error("role is required");
     }
     let baseUrl = '/api/hours?date=' + new Date(date).toISOString().slice(0, 10) + `&user=${user}&role=${role}`;
     try {
