@@ -55,9 +55,14 @@ const ListAppointment = ({ role }: { role: string }) => {
         return (
             <div>
                 <section className="pr-10 pl-20">
-                    <div className="flex flex-col items-start pt-20 pb-10">
-                        <h2 className="title-lg">Seus agendamentos</h2>
-                        <p className="p-sm subt-color">Aqui você pode visualizar seus horários marcados.</p>
+                    <div className="flex justify-between items-end pt-20 pb-10">
+                        <div className="flex flex-col items-start">
+                            <h2 className="title-lg">Seus agendamentos</h2>
+                            <p className="p-sm subt-color">Aqui você pode visualizar seus horários marcados.</p>
+                        </div>
+                        <div>
+                            <a href="/login" className="text-sm link mx-2">Sair</a>
+                        </div>
                     </div>
                     <ul>
                         {appointments.length > 0 ? (
@@ -143,6 +148,7 @@ const ListAppointment = ({ role }: { role: string }) => {
                             <p className="p-sm subt-color">Aqui você pode visualizar os horários marcados.</p>
                         </div>
                         <div className="flex gap-4 items-center">
+                            <a href="/login" className="text-sm link mx-2">Sair</a>
                             <input
                                 type="date"
                                 name="appointmentDate"
