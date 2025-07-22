@@ -129,11 +129,13 @@ export async function fetchAppointments(role: string): Promise<AppointmentData[]
             return response.data.barbers?.flatMap((barber: BarberSlot) =>
                 barber.hours.map(hour => ({
                     ...hour,
+                    date: hour.date,
                     barber: barber.name,
+                    hour: hour.hour,
                     speciality: hour.speciality,
                     client: hour.client
                 }))
-            ) ?? [];
+            ) ?? [] as AppointmentData[];
         }
         return response.data as AppointmentData[];
     } catch (error) {

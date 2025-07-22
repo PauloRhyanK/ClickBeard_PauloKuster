@@ -140,7 +140,6 @@ const ListAppointment = ({ role }: { role: string }) => {
                     <input type="date" name="appointmentDate" id="appointmentDate" />
                 </div>
                 <ul>
-                    {/* Manhã */}
                     {groupedAppointments.morning.length > 0 && (
                         <li className={(role === "barber" ? "itemAppointmentBarber" : "itemAppointmentAdmin") + " flex flex-col mb-5 pb-10"}>
                             <div className="itemHeader flex justify-between items-center p-md p-5">
@@ -166,7 +165,6 @@ const ListAppointment = ({ role }: { role: string }) => {
                         </li>
                     )}
                     
-                    {/* Tarde */}
                     {groupedAppointments.afternoon.length > 0 && (
                         <li className={(role === "barber" ? "itemAppointmentBarber" : "itemAppointmentAdmin") + " flex flex-col mb-5 pb-10"}>
                             <div className="itemHeader flex justify-between items-center p-md p-5">
@@ -192,7 +190,6 @@ const ListAppointment = ({ role }: { role: string }) => {
                         </li>
                     )}
                     
-                    {/* Noite */}
                     {groupedAppointments.night.length > 0 && (
                         <li className={(role === "barber" ? "itemAppointmentBarber" : "itemAppointmentAdmin") + " flex flex-col mb-5 pb-10"}>
                             <div className="itemHeader flex justify-between items-center p-md p-5">
