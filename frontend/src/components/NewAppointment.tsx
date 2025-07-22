@@ -1,4 +1,4 @@
-import { fetchAvailableHours, BarberSlot, HourSlot } from "@/lib/hoursService";
+import { fetchAvailableHours, fetchNewAppointment, BarberSlot, HourSlot } from "@/lib/appoitmentService";
 import React, { useState, useEffect } from "react";
 import HoursApointment from "./HoursApointment";
 
@@ -13,10 +13,12 @@ const NewAppointment: React.FC<NewAppointmentProps> = ({ role }) => {
     const [allBarbers, setAllBarbers] = useState<BarberSlot[]>([]);
     const [specialities, setSpecialities] = useState<string[]>([]);
     const [date, setDate] = useState<Date>(new Date());
+    const [clients, setClients] = useState<string>("");
 
     const [speciality, setSpeciality] = useState<string>("");
     const [selectedBarber, setSelectedBarber] = useState<string>("");
     const [hoursSelected, setHoursSelected] = useState<string>("");
+    const [client, setClient] = useState<string>("");
 
     const token = localStorage.getItem("token");
     const user = localStorage.getItem("user");
@@ -103,7 +105,8 @@ const NewAppointment: React.FC<NewAppointmentProps> = ({ role }) => {
         setHoursSelected("");
     };
 
-    const handleSubmit = (e: React.FormEvent) => {
+
+    const handleSubmit = async (e: React.FormEvent) => {
         e.preventDefault();
         
         if (!hoursSelected) {
@@ -116,13 +119,32 @@ const NewAppointment: React.FC<NewAppointmentProps> = ({ role }) => {
             return;
         }
 
+        if (!speciality) {
+            alert("Selecione uma especialidade");
+            return;
+        }
+
         const appointmentData = {
             date: date.toISOString().split('T')[0],
             hour: hoursSelected,
             barber: selectedBarber,
             speciality: speciality,
-            role: userRole
+            role: userRole,
+            ...(client && { client }) 
         };
+
+        try {
+            const resp = await fetchNewAppointment(appointmentData);
+            
+            if (resp.success) {
+                alert("Agendamento criado com sucesso!");
+                resetFilters();
+            } else {
+                alert(resp.message || "Erro ao criar agendamento");
+            }
+        } catch (error: any) {
+            alert(error.message || "Erro ao criar agendamento");
+        }
     };
 
     return (
@@ -170,7 +192,8 @@ const NewAppointment: React.FC<NewAppointmentProps> = ({ role }) => {
                         ))}
                     </select>
                 </div>
-
+                
+                {(userRole === "admin" || userRole === "client") && (
                 <div className="flex flex-col gap-2">
                     <label htmlFor="barber">Selecione o barbeiro</label>
                     <select 
@@ -186,9 +209,9 @@ const NewAppointment: React.FC<NewAppointmentProps> = ({ role }) => {
                             </option>
                         ))}
                     </select>
-                </div>
+                </div>)}
 
-                {userRole === "admin" && (
+                {(userRole === "admin" || userRole === "barber") && (
                     <div className="flex flex-col gap-2">
                         <label htmlFor="client">Selecione o cliente</label>
                         <select name="client" id="client">
