@@ -1,0 +1,62 @@
+// schema.prisma
+
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+model Users {
+  id_user      BigInt     @id @default(autoincrement())
+  type_user    UserType
+  name_user    String
+  email_user   String     @unique
+  pass_user    String
+  age_user     Int?
+  hiring_date  DateTime?
+  created_at   DateTime   @default(now())
+
+  barber_specialities Barber_Specialities[]
+  appointments_client  Appointments[]       @relation("ClientAppointments")
+  appointments_barber  Appointments[]       @relation("BarberAppointments")
+}
+
+model Specialties {
+  id_speciality   BigInt   @id
+  nm_speciality   String
+
+  barber_specialities Barber_Specialities[]
+  appointments        Appointments[]
+}
+
+model Barber_Specialities {
+  id_user        BigInt
+  id_speciality  BigInt
+
+  user           Users       @relation(fields: [id_user], references: [id_user])
+  speciality     Specialties @relation(fields: [id_speciality], references: [id_speciality])
+
+  @@id([id_user, id_speciality])
+}
+
+model Appointments {
+  id_appointments BigInt    @id @default(autoincrement())
+  id_client       BigInt
+  id_barber       BigInt
+  id_speciality   BigInt
+  appointment_time DateTime
+  canceled_at      DateTime?
+
+  client     Users       @relation("ClientAppointments", fields: [id_client], references: [id_user])
+  barber     Users       @relation("BarberAppointments", fields: [id_barber], references: [id_user])
+  speciality Specialties @relation(fields: [id_speciality], references: [id_speciality])
+}
+
+enum UserType {
+  client
+  barber
+  admin
+}

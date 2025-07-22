@@ -1,0 +1,16 @@
+services:
+  db:
+    image: postgres
+    container_name: clickbeard_db
+    restart: always
+    environment:
+      POSTGRES_USER: clickbeard
+      POSTGRES_PASSWORD: dev123
+      POSTGRES_DB: clickbeard_db
+    volumes:
+      - postgres_data:/var/lib/postgresql/data
+    ports:
+      - '5432:5432'
+
+volumes:
+  postgres_data:

@@ -165,6 +165,30 @@ app/
 - **Axios** - Cliente HTTP
 - **React Hooks** - Gerenciamento de estado
 
+## Arquitetura do Backend
+
+```txt
+clickbeard-backend/
+├─ src/
+│  ├─ controllers/
+│  ├─ middlewares/
+│  ├─ routes/
+│  ├─ services/
+│  ├─ prisma/
+│  ├─ utils/
+│  ├─ types/
+│  ├─ app.ts
+│  └─ server.ts
+├─ prisma/
+│  └─ schema.prisma
+├─ docker-compose.yml
+├─ Dockerfile
+├─ .env
+├─ tsconfig.json
+├─ nodemon.json
+├─ package.json
+```
+
 
 
 ## Funcionalidades
