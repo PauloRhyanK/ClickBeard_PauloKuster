@@ -1,41 +1,17 @@
 import axios from "axios";
+import { 
+    BarberSlot, 
+    NewAppointmentResponse, 
+    CreateAppointmentData, 
+    AppointmentData,
+    CreateAppointmentRequest 
+} from "@/types";
 
 interface HourRequest {
     date: string;
     token: string;
     user: string;
     role: string;
-}
-export interface HourSlot {
-    hour: string;
-    selected: boolean;
-}
-
-export interface BarberSlot {
-    name: string;
-    specialities: string[];
-    hours: AppointmentData[];
-}
-
-
-export interface NewAppointmentResponse {
-    date: string;
-    barbers: BarberSlot[];
-    hoursDay: HourSlot[];
-}
-
-export interface createAppointmentData {
-    success: boolean;
-    message: string;
-}
-
-export interface AppointmentData {
-    date: string;
-    hour: string;
-    barber: string;
-    speciality: string;
-    role?: string;
-    client?: string; 
 }
 
 export async function fetchAvailableHours({ date, token, user, role }: HourRequest): Promise<NewAppointmentResponse> {
@@ -62,14 +38,7 @@ export async function fetchAvailableHours({ date, token, user, role }: HourReque
     }
 }
 
-export async function fetchNewAppointment(data: {
-    date: string;
-    hour: string;
-    barber: string;
-    speciality: string;
-    role: string;
-    client?: string; 
-}): Promise<createAppointmentData> {
+export async function fetchNewAppointment(data: CreateAppointmentRequest): Promise<CreateAppointmentData> {
     if (!data.date) {
         throw new Error("Date is required");
     }
@@ -101,7 +70,7 @@ export async function fetchNewAppointment(data: {
                 'Content-Type': 'application/json'
             }
         });
-        return response.data as createAppointmentData;
+        return response.data as CreateAppointmentData;
     } catch (error: any) {
         console.error("Error creating appointment:", error);
         if (error.response?.status === 401) {

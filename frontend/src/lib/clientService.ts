@@ -1,15 +1,5 @@
 import axios from "axios";
-
-export interface Client {
-    id: string;
-    name: string;
-}
-
-export interface ClientsResponse {
-    success: boolean;
-    clients: Client[];
-    message?: string;
-}
+import { Client, ClientsResponse } from "@/types";
 
 export async function fetchClients(token: string): Promise<Client[]> {
     if (!token) {

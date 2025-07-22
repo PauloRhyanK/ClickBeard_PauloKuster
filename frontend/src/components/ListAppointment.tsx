@@ -1,4 +1,5 @@
-import { AppointmentData, fetchAppointments } from "@/lib/appoitmentService";
+import { fetchAppointments } from "@/lib/appoitmentService";
+import { AppointmentData } from "@/types";
 import { useEffect, useState } from "react";
 
 const ListAppointment = ({ role }: { role: string }) => {

@@ -1,5 +1,5 @@
 import { Fragment } from "react";
-import {HourSlot} from "@/lib/appoitmentService";
+import { HourSlot } from "@/types";
 
 type HoursApointmentProps = {
     hours: HourSlot[];

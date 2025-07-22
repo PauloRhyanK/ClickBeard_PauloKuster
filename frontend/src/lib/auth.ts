@@ -1,6 +1,7 @@
 import axios from "axios";
+import { LoginResponse } from "@/types";
 
-export async function loginUser(email: string, password: string) {
+export async function loginUser(email: string, password: string): Promise<LoginResponse> {
     email = email.trim();
     password = password.trim();
     if (!email) {

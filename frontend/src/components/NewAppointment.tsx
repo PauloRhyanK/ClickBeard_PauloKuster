@@ -1,5 +1,6 @@
-import { fetchAvailableHours, fetchNewAppointment, BarberSlot, HourSlot } from "@/lib/appoitmentService";
-import { fetchClients, Client } from "@/lib/clientService";
+import { fetchAvailableHours, fetchNewAppointment } from "@/lib/appoitmentService";
+import { BarberSlot, HourSlot, Client } from "@/types";
+import { fetchClients,  } from "@/lib/clientService";
 import React, { useState, useEffect } from "react";
 import HoursApointment from "./HoursApointment";
 
@@ -24,6 +25,11 @@ const NewAppointment: React.FC<NewAppointmentProps> = ({ role }) => {
     const token = localStorage.getItem("token");
     const user = localStorage.getItem("user");
 
+    useEffect(() => {
+        if (role === "barber") {
+            setSelectedBarber(user || "");
+        }
+    }, [role, user]);
 
     useEffect(() => {
         const fetchData = async () => {
