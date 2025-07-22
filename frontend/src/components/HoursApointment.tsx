@@ -1,15 +1,20 @@
-type HoursAppointment = {
-    hour: string;
-    selected: boolean;
+import { Fragment } from "react";
+import {HourSlot} from "@/lib/hoursService";
+
+type HoursApointmentProps = {
+    hours: HourSlot[];
+    setHour: (hour: string) => void;
+    selectedHour: string;
 };
 
-export default function HoursApointment({ hours, setHours }: { hours: HoursAppointment[], setHours: React.Dispatch<React.SetStateAction<HoursAppointment[]>> }) {
-
+export default function HoursApointment({ hours, setHour, selectedHour }: HoursApointmentProps) {
     const period = { class: "", name: "", isTitle: false };
+    
     function sPeriod(hour: string, period: { class: string; name: string; isTitle: boolean }) {
         let h = parseInt(hour.split(":")[0]);
         let tempClass = "";
         let tempName = "";
+        
         if (h < 13) {
             tempClass = "morning";
             tempName = "Manhã";
@@ -20,6 +25,7 @@ export default function HoursApointment({ hours, setHours }: { hours: HoursAppoi
             tempClass = "night";
             tempName = "Noite";
         }
+        
         if (tempClass != period.class) {
             period.class = tempClass;
             period.name = tempName;
@@ -30,23 +36,60 @@ export default function HoursApointment({ hours, setHours }: { hours: HoursAppoi
         return period;
     }
 
+    const getHourClass = (hour: HourSlot) => {
+        const isSelected = selectedHour === hour.hour;
+        const isAvailable = !hour.selected; 
+        
+        if (isSelected) {
+            return "hour hour-selected"; 
+        } else if (isAvailable) {
+            return "hour hour-available"; 
+        } else {
+            return "hour hour-unavailable"; 
+        }
+    };
+
+    const handleHourClick = (hour: HourSlot) => {
+        if (!hour.selected) {
+            if (selectedHour === hour.hour) {
+                setHour(""); 
+            } else {
+                setHour(hour.hour);
+            }
+        }
+    };
+
     return (
-        <ul className="grid grid-cols-4 gap-2">
-    {hours.map((hour, index) => {
-        const currentPeriod = sPeriod(hour.hour, period);
-        return (
-            <>
-                {currentPeriod.isTitle && (
-                    <li key={`header-${index}`} className={`hour-period ${currentPeriod.class}`}>
-                        {currentPeriod.name}
-                    </li>
-                )}
-                <li key={index} className="hour hour-available flex items-center gap-2" onClick={() => {}}>
-                    {hour.hour}
-                </li>
-            </>
-        );
-    })}
-        </ul>
+        <>
+            <label className="label">Horários Disponíveis</label>
+            <ul className="grid grid-cols-4 gap-2">
+                {hours.map((hour, index) => {
+                    const currentPeriod = sPeriod(hour.hour, period);
+                    return (
+                        <Fragment key={`fragment-${index}`}>
+                            {currentPeriod.isTitle && (
+                                <li 
+                                    key={`header-${index}`} 
+                                    className={`hour-period ${currentPeriod.class} col-span-4 text-center py-2 font-semibold`}
+                                >
+                                    {currentPeriod.name}
+                                </li>
+                            )}
+                            <li 
+                                key={`hour-${index}`}
+                                className={`${getHourClass(hour)} flex items-center justify-center gap-2 p-2 rounded cursor-pointer transition-all`}
+                                onClick={(e) => {
+                                    e.stopPropagation();
+                                    handleHourClick(hour);
+                                }}
+                            >
+                                {hour.hour}
+                            </li>
+                        </Fragment>
+                    );
+                })}
+            </ul>
+        
+        </>
     );
 }
