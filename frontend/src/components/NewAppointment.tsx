@@ -185,6 +185,7 @@ const NewAppointment: React.FC<NewAppointmentProps> = ({ role }) => {
                         id="appointmentDate" 
                         name="appointmentDate"
                         min={new Date().toISOString().split('T')[0]}
+                        value={date.toISOString().split('T')[0]}
                         required 
                     />
                 </div>
