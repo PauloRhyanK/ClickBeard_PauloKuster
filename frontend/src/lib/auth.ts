@@ -37,6 +37,9 @@ export async function loginUser(email: string, password: string) {
 export async function verifyToken(token: string, user: string, role: string ): Promise<boolean> {
     try {
         const res = await axios.post("/api/token", { token, user, role });
+        if (res.status !== 200) {
+            throw new Error("Token verification failed");
+        }
         return res.data.valid;
     } catch (error) {
         console.error("Token verification failed:", error);
