@@ -67,10 +67,44 @@
   font: var(--text-sm);
 }
 
+.dashboardContainer {
+    display: grid;
+    grid-template-columns: 1fr 2fr;
+}
 .el-screen{
   margin-inline: auto;
   max-width: 1920px;
 }
+
+.itemAppointmentClient {
+  border: 1px solid var(--yellight);
+  border-radius: 10px;
+}
+
+.itemAppointmentClient > .itemHeader{
+  border-bottom: 1px solid var(--yellight);
+}
+
+.itemAppointmentClient > .itemData {
+  display: grid;
+  grid-template-columns: 1fr repeat(2, 4fr) 1fr;
+}
+
+.itemHistoricClient {
+  border: 1px solid var(--gray-500);
+  border-radius: 10px;
+}
+
+.itemHistoricClient > .itemHeader{
+  border-bottom: 1px solid var(--gray-500);
+}
+
+.itemHistoricClient > .itemData {
+  display: grid;
+  grid-template-columns: 1fr repeat(2, 4fr);
+}
+
+
 
 .radioButton{
   background-color: var(--gray-500);
