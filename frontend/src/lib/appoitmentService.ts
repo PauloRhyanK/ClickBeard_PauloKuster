@@ -14,7 +14,7 @@ export interface HourSlot {
 export interface BarberSlot {
     name: string;
     specialities: string[];
-    hours: HourSlot[];
+    hours: AppointmentData[];
 }
 
 
@@ -27,6 +27,15 @@ export interface NewAppointmentResponse {
 export interface createAppointmentData {
     success: boolean;
     message: string;
+}
+
+export interface AppointmentData {
+    date: string;
+    hour: string;
+    barber: string;
+    speciality: string;
+    role?: string;
+    client?: string; 
 }
 
 export async function fetchAvailableHours({ date, token, user, role }: HourRequest): Promise<NewAppointmentResponse> {
@@ -100,5 +109,35 @@ export async function fetchNewAppointment(data: {
         }
         
         throw new Error("Falha ao criar agendamento");
+    }
+}
+
+export async function fetchAppointments(role: string): Promise<AppointmentData[]> {
+    const token = localStorage.getItem("token");
+    const user = localStorage.getItem("user");
+    if (!token) {
+        throw new Error("Token is required");
+    }
+
+    try {
+        const response = await axios.get(`/api/appointments?role=${role}&user=${user}`, {
+            headers: {
+                Authorization: `Bearer ${token}`
+            }
+        });
+        if(role==='barber' || role==='admin') {
+            return response.data.barbers?.flatMap((barber: BarberSlot) =>
+                barber.hours.map(hour => ({
+                    ...hour,
+                    barber: barber.name,
+                    speciality: hour.speciality,
+                    client: hour.client
+                }))
+            ) ?? [];
+        }
+        return response.data as AppointmentData[];
+    } catch (error) {
+        console.error("Error fetching appointments:", error);
+        throw new Error("Failed to fetch appointments");
     }
 }

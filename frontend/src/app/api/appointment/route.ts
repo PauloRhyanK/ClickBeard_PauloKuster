@@ -18,13 +18,18 @@ export async function POST(request: NextRequest) {
             }, { status: 400 });
         }
 
-        const formattedDate = new Date(date).toISOString().slice(0, 10);
+        const formatDateToISO = (dateString: string): string => {
+            const date = new Date(dateString);
+            return date.toISOString().split('T')[0];
+        };
+
+        const formattedDate = formatDateToISO(date);
         const appointmentData = {
             date: formattedDate,
             hour,
             barber,
             speciality: speciality || "",
-            role
+            user_type: role,
         };
 
         const baseUrl = 'http://localhost:3002/appointments';
@@ -48,7 +53,7 @@ export async function POST(request: NextRequest) {
             error: "Failed to create appointment" 
         }, { status: response.status });
 
-    } catch (error: any) {;
+    } catch (error: any) {
         if (error.response) {
             return NextResponse.json({ 
                 success: false,
@@ -62,3 +67,4 @@ export async function POST(request: NextRequest) {
         }, { status: 500 });
     }
 }
+

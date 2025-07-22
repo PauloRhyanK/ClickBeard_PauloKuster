@@ -52,7 +52,7 @@ const NewAppointment: React.FC<NewAppointmentProps> = ({ role }) => {
     const isBarberAvailable = (barber: BarberSlot, targetHour: string): boolean => {
         if (!Array.isArray(barber.hours)) return true;
         const reservedHour = barber.hours.find(h => h.hour === targetHour);
-        return !reservedHour || !reservedHour.selected;
+        return !reservedHour;
     };
 
     useEffect(() => {
@@ -169,7 +169,7 @@ const NewAppointment: React.FC<NewAppointmentProps> = ({ role }) => {
     };
 
     return (
-        <div className="window-color m-3 rounded-2xl flex flex-col items-center justify-center new-appointment-container pt-20 pb-10 pr-10 pl-10">
+        <div className="window-color m-3 rounded-2xl flex flex-col items-center justify-start new-appointment-container pt-20 pb-10 pr-10 pl-10">
             <div className="flex flex-col items-start">
                 <h2 className="title-lg">Agende um atendimento</h2>
                 <p className="p-sm subt-color">Selecione data, horário e informe o nome do barbeiro para criar o agendamento</p>
