@@ -67,6 +67,11 @@
   font: var(--text-sm);
 }
 
+.close {
+  font-weight: bold;
+  cursor: pointer;
+}
+
 .dashboardContainer {
     display: grid;
     grid-template-columns: 1fr 2fr;
@@ -104,6 +109,33 @@
   grid-template-columns: 1fr repeat(2, 4fr);
 }
 
+.itemAppointmentBarber {
+  border: 1px solid var(--gray-500);
+  border-radius: 10px;
+}
+
+.itemAppointmentBarber > .itemHeader{
+  border-bottom: 1px solid var(--gray-500);
+}
+
+.itemAppointmentBarber > .itemData {
+  display: grid;
+  grid-template-columns: 1fr repeat(2, 4fr);
+}
+
+.itemAppointmentAdmin {
+  border: 1px solid var(--gray-500);
+  border-radius: 10px;
+}
+
+.itemAppointmentAdmin > .itemHeader{
+  border-bottom: 1px solid var(--gray-500);
+}
+
+.itemAppointmentAdmin > .itemData {
+  display: grid;
+  grid-template-columns: 1fr repeat(3, 4fr) 1fr;
+}
 
 
 .radioButton{
