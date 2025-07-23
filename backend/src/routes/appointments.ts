@@ -65,6 +65,53 @@ router.post('/', authenticateToken, async (req: AuthRequest, res) => {
   }
 });
 
+// POST /appointments/cancel
+router.post('/cancel', authenticateToken, async (req: AuthRequest, res) => {
+  try {
+    const { date, hour, email_barber, email_client } = req.body;
+    const userRole = req.user?.role;
+    const userId = req.user?.id;
+    if (!date || !hour || !email_barber || !email_client) {
+      return res.status(400).json({ success: false, message: 'Campos obrigatórios ausentes' });
+    }
+
+    const appointmentDate = new Date(`${date}T${hour}:00.000Z`);
+    const barber = await prisma.users.findUnique({ where: { email_user: email_barber, type_user: 'barber' } });
+    if (!barber) {
+      return res.status(400).json({ success: false, message: 'Barbeiro não encontrado' });
+    }
+    const client = await prisma.users.findUnique({ where: { email_user: email_client, type_user: 'client' } });
+    if (!client) {
+      return res.status(400).json({ success: false, message: 'Cliente não encontrado' });
+    }
+
+    const appointment = await prisma.appointments.findFirst({
+      where: {
+        id_barber: barber.id_user,
+        id_client: client.id_user,
+        appointment_time: appointmentDate,
+        canceled_at: null
+      }
+    });
+    if (!appointment) {
+      return res.status(404).json({ success: false, message: 'Agendamento não encontrado ou já cancelado' });
+    }
+
+    // Só o cliente do appointment ou admin pode cancelar
+    if (!(userRole === 'admin' || (userRole === 'client' && userId && BigInt(userId) === appointment.id_client))) {
+      return res.status(403).json({ success: false, message: 'Apenas o cliente do agendamento ou admin pode cancelar' });
+    }
+
+    await prisma.appointments.update({
+      where: { id_appointments: appointment.id_appointments },
+      data: { canceled_at: new Date() }
+    });
+    return res.status(200).json({ success: true });
+  } catch (err) {
+    return res.status(500).json({ success: false, message: 'Erro ao cancelar agendamento', details: err instanceof Error ? err.message : err });
+  }
+});
+
 // GET /appointments/list
 router.get('/list', authenticateToken, async (req: AuthRequest, res) => {
   const { date, email_user } = req.query;
