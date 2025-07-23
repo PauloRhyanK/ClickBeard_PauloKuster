@@ -11,7 +11,7 @@ export default function HoursApointment({ hours, setHour, selectedHour }: HoursA
     const period = { class: "", name: "", isTitle: false };
     
     function sPeriod(hour: string, period: { class: string; name: string; isTitle: boolean }) {
-        let h = parseInt(hour.split(":")[0]);
+        const h = parseInt(hour.split(":")[0]);
         let tempClass = "";
         let tempName = "";
         

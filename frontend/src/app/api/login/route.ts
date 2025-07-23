@@ -46,8 +46,8 @@ export async function POST(request: NextRequest) {
             const data = response.data;
             return NextResponse.json(data);
         }
-        
-    } catch (error: any) {        
+
+    } catch (error: unknown) {
         if (axios.isAxiosError(error)) {
             return NextResponse.json({
                 "error": "Erro de conexão com backend"

@@ -53,14 +53,7 @@ export async function POST(request: NextRequest) {
             error: "Failed to create appointment" 
         }, { status: response.status });
 
-    } catch (error: any) {
-        if (error.response) {
-            return NextResponse.json({ 
-                success: false,
-                error: error.response.data?.message || "Failed to create appointment",
-            }, { status: error.response.status });
-        }
-
+    } catch (error: unknown) {
         return NextResponse.json({ 
             success: false,
             error: "Internal server error" 

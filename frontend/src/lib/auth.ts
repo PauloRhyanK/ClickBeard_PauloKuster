@@ -29,9 +29,8 @@ export async function loginUser(email: string, password: string): Promise<LoginR
         localStorage.setItem("user", res.data.user.id_user);
         
         return res.data;
-    } catch (error: any) {
-        console.log(error.message);
-        throw new Error("Login request failed: " + (error.response?.data?.error || error.message));
+    } catch (error: unknown) {
+        throw new Error("Login request failed");
     }
 }
 

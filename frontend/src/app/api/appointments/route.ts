@@ -13,7 +13,6 @@ export async function GET(request: NextRequest) {
         const role = searchParams.get("role");
         const date = searchParams.get("date");
         const user = searchParams.get("user");
-        const myAppointment = searchParams.get("myAppointment");
 
         if (!role) {
             return NextResponse.json({
@@ -22,7 +21,7 @@ export async function GET(request: NextRequest) {
         }
 
         
-        let baseUrl = 'http://localhost:3002/dashboard';
+        const baseUrl = 'http://localhost:3002/dashboard';
         const params = new URLSearchParams();
         
         const queryDate = date || new Date().toLocaleDateString('pt-BR');
@@ -57,15 +56,7 @@ export async function GET(request: NextRequest) {
             error: "Failed to fetch appointments" 
         }, { status: response.status });
 
-    } catch (error: any) {
-        console.error("Error fetching appointments:", error);
-        
-        if (error.response) {
-            return NextResponse.json({ 
-                error: error.response.data?.message || "Failed to fetch appointments",
-            }, { status: error.response.status });
-        }
-
+    } catch (error: unknown) {
         return NextResponse.json({ 
             error: "Internal server error" 
         }, { status: 500 });

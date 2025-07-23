@@ -66,10 +66,10 @@ export default function Register() {
                     appointments: []
                 });
             } else {
-                alert("Erro ao cadastrar usuário");
+                alert("Erro ao cadastrar usuário, , tente novamente mais tarde.");
             }
-        } catch (error: any) {
-            alert("Erro ao cadastrar: " + error.response?.data?.error || error.message);
+        } catch (error: unknown) {
+            alert("Erro ao cadastrar usuário, tente novamente mais tarde.");
             console.error("Registration failed:", error);
         }
     }

@@ -26,8 +26,7 @@ export async function GET(request: NextRequest) {
             return NextResponse.json(response.data);
         }
         return NextResponse.json({ error: "Failed to fetch hours" }, { status: response.status });
-    } catch (error: any) {
-        console.error(`Status: ${(error as any).status} Error fetching hours:`, error);
+    } catch (error: unknown) {
         return NextResponse.json({ error: "Internal server error" }, { status: 500 });
     }
 }

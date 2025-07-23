@@ -21,13 +21,8 @@ export async function fetchClients(token: string): Promise<Client[]> {
         } else {
             throw new Error(data.message || "Failed to fetch clients");
         }
-    } catch (error: any) {
+    } catch (error: unknown) {
         console.error("Error fetching clients:", error);
-        
-        if (error.response?.status === 401) {
-            throw new Error("Token expirado ou inválido");
-        }
-        
-        throw new Error("Falha ao buscar clientes");
+        throw new Error("Failed to fetch clients");
     }
 }

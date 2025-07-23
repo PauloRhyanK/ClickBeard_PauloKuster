@@ -9,7 +9,7 @@ export async function POST(request: NextRequest) {
         if(res.status >= 200 && res.status < 300) {            
             return NextResponse.json({ response: res.data, message: "Token Válido!" });
         }
-    }catch (error: any) {
+    }catch (error: unknown) {
         if (axios.isAxiosError(error)) {
             return NextResponse.json({
                 error: error.response?.data?.error || "Erro de conexão com o backend"

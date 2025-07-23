@@ -24,7 +24,7 @@ export async function fetchAvailableHours({ date, token, user, role }: HourReque
     if (!user) {
         throw new Error("User is required");
     }
-    let baseUrl = '/api/hours?date=' + new Date(date).toISOString().slice(0, 10) + `&user=${user}&role=${role}`;
+    const baseUrl = '/api/hours?date=' + new Date(date).toISOString().slice(0, 10) + `&user=${user}&role=${role}`;
     try {
         const response = await axios.get(baseUrl, {
             headers: {
@@ -71,12 +71,7 @@ export async function fetchNewAppointment(data: CreateAppointmentRequest): Promi
             }
         });
         return response.data as CreateAppointmentData;
-    } catch (error: any) {
-        console.error("Error creating appointment:", error);
-        if (error.response?.status === 401) {
-            throw new Error("Token expirado ou inválido");
-        }
-        
+    } catch (error: unknown) {
         throw new Error("Falha ao criar agendamento");
     }
 }

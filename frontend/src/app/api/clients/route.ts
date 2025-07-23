@@ -31,17 +31,7 @@ export async function GET(request: NextRequest) {
             clients: []
         }, { status: response.status });
 
-    } catch (error: any) {
-        console.error("Error fetching clients:", error);
-        
-        if (error.response) {
-            return NextResponse.json({ 
-                success: false,
-                error: error.response.data?.message || "Failed to fetch clients",
-                clients: []
-            }, { status: error.response.status });
-        }
-
+    } catch (error: unknown) {
         return NextResponse.json({ 
             success: false,
             error: "Internal server error",
