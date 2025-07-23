@@ -1,10 +1,26 @@
-import request from 'supertest';
 import app from '../app';
 import { PrismaClient } from '@prisma/client';
+import request from 'supertest';
 const prisma = new PrismaClient();
 
+
+
+// Limpa apenas usuários criados para os testes
+const testEmails = [
+  'joao@teste.com',
+  'faltando@teste.com',
+  'tipo@teste.com',
+  'duplicado@teste.com'
+];
+
 beforeEach(async () => {
-  await prisma.users.deleteMany({});
+  await prisma.users.deleteMany({
+    where: { email_user: { in: testEmails } }
+  });
+});
+
+afterAll(async () => {
+  await prisma.$disconnect();
 });
 
 describe('Cadastro de usuário', () => {

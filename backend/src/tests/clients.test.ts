@@ -8,8 +8,17 @@ let adminToken: string;
 let barberToken: string;
 let clientToken: string;
 
-beforeAll(async () => {
-  await prisma.users.deleteMany({});
+
+const testEmails = [
+  'admin@teste.com',
+  'barber@teste.com',
+  'client@teste.com'
+];
+
+beforeEach(async () => {
+  await prisma.users.deleteMany({
+    where: { email_user: { in: testEmails } }
+  });
   const admin = await prisma.users.create({
     data: {
       name_user: 'Admin',
@@ -38,6 +47,11 @@ beforeAll(async () => {
   adminToken = jwt.sign({ id: admin.id_user.toString(), role: 'admin' }, JWT_SECRET);
   barberToken = jwt.sign({ id: barber.id_user.toString(), role: 'barber' }, JWT_SECRET);
   clientToken = jwt.sign({ id: client.id_user.toString(), role: 'client' }, JWT_SECRET);
+});
+
+afterAll(async () => {
+  await prisma.users.deleteMany({ where: { email_user: { in: testEmails } } });
+  await prisma.$disconnect();
 });
 
 describe('GET /users/clients', () => {
