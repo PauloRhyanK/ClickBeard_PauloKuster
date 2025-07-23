@@ -96,7 +96,6 @@ router.get('/clients', authenticateToken, authorizeAdminOrBarber, async (req: Au
     ...c,
     id_user: c.id_user.toString(),
   }));
-  console.log('Clientes encontrados:', clientsSerialized);
   return res.status(200).json(clientsSerialized);
 } catch (err) {
     console.error('Erro ao buscar clientes:', err);

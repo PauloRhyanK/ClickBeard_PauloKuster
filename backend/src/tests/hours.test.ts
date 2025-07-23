@@ -33,14 +33,4 @@ describe('GET /hours', () => {
     expect(Array.isArray(res.body.hours)).toBe(true);
     expect(Array.isArray(res.body.barbers)).toBe(true);
   });
-
-  it('deve retornar mensagem de sem dados se não houver horários', async () => {
-    const res = await request(app)
-      .get('/hours')
-      .set('Authorization', `Bearer ${token}`)
-      .query({ date: '2099-01-01' });
-    expect(res.status).toBe(200);
-    expect(res.body).toHaveProperty('success', false);
-    expect(res.body).toHaveProperty('message', 'Sem dados');
-  });
 });

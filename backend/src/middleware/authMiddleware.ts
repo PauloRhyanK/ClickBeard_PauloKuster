@@ -19,7 +19,6 @@ export function authenticateToken(req: AuthRequest, res: Response, next: NextFun
     if (err) {
       return res.status(401).json({ error: 'Erro: Token Inválido' });
     }
-    console.log('Payload JWT decodificado:', decoded);
     req.user = decoded;
     next();
   });

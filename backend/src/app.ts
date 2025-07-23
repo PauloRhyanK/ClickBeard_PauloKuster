@@ -3,7 +3,9 @@ import express from 'express';
 import cors from 'cors';
 import { authenticateToken } from './middleware/authMiddleware';
 import { notFoundHandler } from './middleware/notFoundHandler';
+
 import usersRoutes from './routes/user';
+import hoursRoutes from './routes/hours';
 
 dotenv.config();
 const app = express();
@@ -15,7 +17,9 @@ app.get('/', (req, res) => {
 });
 
 
+
 app.use('/users', usersRoutes);
+app.use('/hours', hoursRoutes);
 
 
 // Handler para rotas não encontradas
