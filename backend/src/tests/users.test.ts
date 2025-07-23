@@ -13,12 +13,6 @@ const testEmails = [
   'duplicado@teste.com'
 ];
 
-beforeEach(async () => {
-  await prisma.users.deleteMany({
-    where: { email_user: { in: testEmails } }
-  });
-});
-
 afterAll(async () => {
   await prisma.$disconnect();
 });

@@ -113,9 +113,4 @@ describe('POST /appointments', () => {
     expect(res.body.success).toBe(false);
     expect(res.body.message).toMatch(/cliente/i);
   });
-
-  afterAll(async () => {
-    await prisma.appointments.deleteMany({});
-    await prisma.$disconnect();
-  });
 });

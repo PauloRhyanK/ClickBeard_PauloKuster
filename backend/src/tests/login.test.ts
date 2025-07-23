@@ -3,9 +3,6 @@ import app from '../app';
 import { PrismaClient } from '@prisma/client';
 const prisma = new PrismaClient();
 
-beforeEach(async () => {
-  await prisma.users.deleteMany({});
-});
 
 describe('Login de usuário', () => {
   beforeEach(async () => {
