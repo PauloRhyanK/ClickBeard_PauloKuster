@@ -98,6 +98,31 @@ O endpoint de listagem de clientes (`GET /users/clients`) é protegido por auten
 - O middleware valida o token e extrai o papel do usuário (`role`).
 - Se o papel for `admin` ou `barber`, o acesso é permitido. Caso contrário, retorna 403.
 
+## Fluxo de Criação de Agendamento (Appointment)
+
+O endpoint `/appointments` permite que um cliente agende um horário com um barbeiro para uma especialidade específica.
+
+### Regras e Fluxo
+
+1. **Autenticação obrigatória:**
+   - O usuário deve enviar um token JWT válido no header `Authorization`.
+2. **Apenas clientes podem agendar:**
+   - O usuário autenticado deve ter o papel `client`.
+3. **Campos obrigatórios:**
+   - `date`, `hour`, `email_barber`, `email_client`, `speciality`.
+4. **Data não pode ser retroativa:**
+   - Não é permitido agendar para datas/horários no passado.
+5. **Barbeiro e cliente devem existir:**
+   - O sistema verifica se ambos existem e têm os papéis corretos.
+6. **Especialidade deve existir e ser do barbeiro:**
+   - O barbeiro deve possuir a especialidade informada.
+7. **Horário deve estar livre para o barbeiro:**
+   - Não pode haver outro agendamento para o barbeiro no mesmo horário.
+8. **Resposta:**
+   - Se tudo estiver correto, retorna `{ success: true }` e status 201.
+   - Se houver qualquer conflito ou erro de validação, retorna `{ success: false, message: <motivo> }` e status 400.
+
+
 ### Fluxo do Endpoint
 
 1. O usuário faz login e recebe um token JWT.
@@ -233,3 +258,34 @@ curl -H "Authorization: Bearer <jwt_token>" http://localhost:3000/users/clients
 curl -H "Authorization: Bearer <jwt_token>" "http://localhost:3000/hours?date=2025-07-22"
 ```
 
+---
+### POST /appointments
+
+**Descrição:** Cria um novo agendamento entre cliente e barbeiro para uma especialidade.
+
+**Headers:**
+- Authorization: Bearer `<jwt_token>`
+
+**Body JSON:**
+```
+{
+  "date": "2025-07-23",
+  "hour": "10:00",
+  "email_barber": "barber@teste.com",
+  "email_client": "client@teste.com",
+  "speciality": "Corte"
+}
+```
+
+**Respostas:**
+- 201: `{ "success": true }`
+- 400: `{ "success": false, "message": "<motivo>" }`
+- 401: `{ "error": "Token inválido ou ausente" }`
+- 500: `{ "success": false, "message": "Erro ao criar agendamento", "details": "..." }`
+
+**Exemplo de uso com curl:**
+```bash
+curl -X POST -H "Authorization: Bearer <jwt_token>" -H "Content-Type: application/json" \
+  -d '{"date":"2025-07-23","hour":"10:00","email_barber":"barber@teste.com","email_client":"client@teste.com","speciality":"Corte"}' \
+  http://localhost:3000/appointments
+```
