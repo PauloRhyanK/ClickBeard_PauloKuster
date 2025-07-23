@@ -1,4 +1,5 @@
-
+import { authenticateToken, AuthRequest } from '../middleware/authMiddleware';
+import { authorizeAdminOrBarber } from '../middleware/authorizeAdminOrBarber';
 import { Router } from 'express';
 import bcrypt from 'bcrypt';
 import { PrismaClient } from '@prisma/client';
@@ -7,7 +8,7 @@ import jwt from 'jsonwebtoken';
 const prisma = new PrismaClient();
 const router = Router();
 
-// POST /login
+// POST /users/login
 router.post('/login', async (req, res) => {
   try {
     const { email, pass } = req.body;
@@ -49,6 +50,7 @@ router.post('/login', async (req, res) => {
   }
 });
 
+// POST /users/register
 router.post('/register', async (req, res) => {
   const { name_user, email_user, pass_user, type_user, age_user, hiring_date } = req.body;
 
@@ -75,6 +77,31 @@ router.post('/register', async (req, res) => {
     },
   });
   return res.status(201).json({ success: true });
+});
+
+// GET /users/clients
+router.get('/clients', authenticateToken, authorizeAdminOrBarber, async (req: AuthRequest, res) => {
+ try {
+  const clients = await prisma.users.findMany({
+    where: { type_user: 'client' },
+    select: {
+      id_user: true,
+      name_user: true,
+      email_user: true,
+      age_user: true,
+      created_at: true,
+    },
+  });
+  const clientsSerialized = clients.map(c => ({
+    ...c,
+    id_user: c.id_user.toString(),
+  }));
+  console.log('Clientes encontrados:', clientsSerialized);
+  return res.status(200).json(clientsSerialized);
+} catch (err) {
+    console.error('Erro ao buscar clientes:', err);
+  return res.status(500).json({ error: 'Erro ao buscar clientes', details: err instanceof Error ? err.message : err });
+}
 });
 
 export default router;
