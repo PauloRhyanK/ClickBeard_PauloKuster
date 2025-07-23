@@ -8,6 +8,8 @@
   "scripts": {
     "dev": "nodemon src/server.ts",
     "docker": "docker-compose up -d",
+    "build": "tsc",
+    "start": "node dist/server.js",
     "test": "jest",
     "test:watch": "jest --watch"
   },
