@@ -33,7 +33,55 @@ Os testes de registro de usuário garantem que:
   - Não é possível cadastrar e-mail duplicado.
   - O banco é limpo antes de cada teste para evitar conflitos.
 
-## Endpoints de Usuário
+
+## Fluxo de Autorização e Listagem de Clientes
+
+### Regras de Autorização
+
+O endpoint de listagem de clientes (`GET /users/clients`) é protegido por autenticação JWT e autorização de papel (role). Apenas usuários autenticados com papel `admin` ou `barber` podem acessar este recurso.
+
+- O token JWT deve ser enviado no header `Authorization` no formato: `Bearer <token>`.
+- O middleware valida o token e extrai o papel do usuário (`role`).
+- Se o papel for `admin` ou `barber`, o acesso é permitido. Caso contrário, retorna 403.
+
+### Fluxo do Endpoint
+
+1. O usuário faz login e recebe um token JWT.
+2. O token é enviado no header Authorization para acessar `/users/clients`.
+3. O backend valida o token e o papel do usuário.
+4. Se autorizado, retorna a lista de clientes cadastrados.
+5. O campo `id_user` é retornado como string para evitar problemas de serialização.
+
+---
+### GET /users/clients
+
+**Descrição:** Retorna a lista de usuários do tipo `client`. Apenas para usuários autenticados com papel `admin` ou `barber`.
+
+**Headers:**
+- Authorization: Bearer `<jwt_token>`
+
+**Respostas:**
+- 200:
+  ```json
+  [
+    {
+      "id_user": "1",
+      "name_user": "Cliente 1",
+      "email_user": "cliente1@exemplo.com",
+      "age_user": 25,
+      "created_at": "2025-07-22T00:00:00.000Z"
+    },
+    // ...
+  ]
+  ```
+- 401: `{ "error": "Token inválido ou ausente" }`
+- 403: `{ "error": "Acesso negado" }`
+- 500: `{ "error": "Erro ao buscar clientes", "details": "..." }`
+
+**Exemplo de uso com curl:**
+```bash
+curl -H "Authorization: Bearer <jwt_token>" http://localhost:3000/users/clients
+```
 
 ### POST /users/register
 
