@@ -356,4 +356,51 @@ curl -X POST -H "Authorization: Bearer <jwt_token>" -H "Content-Type: applicatio
   -d '{"date":"2025-07-23","hour":"10:00","email_barber":"barber@teste.com","email_client":"client@teste.com","speciality":"Corte"}' \
   http://localhost:3000/appointments
 ```
+### POST /appointments/cancel
 
+**Descrição:** Cancela um agendamento existente. Apenas o cliente do agendamento ou um admin podem cancelar.
+
+**Headers:**
+- Authorization: Bearer `<jwt_token>`
+
+**Body JSON:**
+```
+{
+  "date": "2025-07-23",
+  "hour": "10:00",
+  "email_barber": "barber@teste.com",
+  "email_client": "client@teste.com"
+}
+```
+
+**Regras e Fluxo:**
+1. **Autenticação obrigatória:**
+   - O usuário deve enviar um token JWT válido no header `Authorization`.
+2. **Apenas cliente do agendamento ou admin podem cancelar:**
+   - O cliente autenticado só pode cancelar seus próprios agendamentos.
+   - Admin pode cancelar qualquer agendamento.
+3. **Campos obrigatórios:**
+   - `date`, `hour`, `email_barber`, `email_client`.
+4. **Busca e validação:**
+   - O sistema busca o agendamento ativo (não cancelado) com os dados informados.
+   - Se não encontrar, retorna 404.
+   - Se não for o cliente do agendamento ou admin, retorna 403.
+5. **Cancelamento:**
+   - O campo `canceled_at` do agendamento é preenchido com a data/hora atual.
+6. **Resposta:**
+   - Se tudo estiver correto, retorna `{ success: true }` e status 200.
+   - Se houver qualquer conflito ou erro de validação, retorna `{ success: false, message: <motivo> }` e status adequado.
+
+**Respostas:**
+- 200: `{ "success": true }`
+- 400: `{ "success": false, "message": "Campos obrigatórios ausentes" }`
+- 403: `{ "success": false, "message": "Apenas o cliente do agendamento ou admin pode cancelar" }`
+- 404: `{ "success": false, "message": "Agendamento não encontrado ou já cancelado" }`
+- 500: `{ "success": false, "message": "Erro ao cancelar agendamento", "details": "..." }`
+
+**Exemplo de uso com curl:**
+```bash
+curl -X POST -H "Authorization: Bearer <jwt_token>" -H "Content-Type: application/json" \
+  -d '{"date":"2025-07-23","hour":"10:00","email_barber":"barber@teste.com","email_client":"client@teste.com"}' \
+  http://localhost:3000/appointments/cancel
+```
