@@ -12,5 +12,19 @@ services:
     ports:
       - '5432:5432'
 
+  backend:
+    build: .
+    container_name: clickbeard_backend
+    restart: always
+    environment:
+      DATABASE_URL: postgres://clickbeard:dev123@db:5432/clickbeard_db
+      PORT: 3333
+      JWT_SECRET: NotSet
+    ports:
+      - '3000:3000'
+    depends_on:
+      - db
+    command: sh -c "npx prisma migrate deploy && npm run build && npm start"
+
 volumes:
   postgres_data:
