@@ -97,10 +97,12 @@ const NewAppointment: React.FC<NewAppointmentProps> = ({ role }) => {
                     user: user || "", 
                     role: userRole 
                 });
-                const allHours = availableHours.hoursDay.map(hour => ({
-                    hour: hour.hour,
-                    selected: hour.selected
-                }));
+                const allHours = Array.isArray(availableHours.hoursDay)
+                    ? availableHours.hoursDay.map(hour => ({
+                        hour: hour.hour,
+                        selected: hour.selected
+                    }))
+                    : [];
                 const allBarbersData = availableHours.barbers.map(barber => ({
                     name: barber.name,
                     specialities: barber.specialities || [],

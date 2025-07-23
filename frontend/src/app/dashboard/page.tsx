@@ -4,13 +4,19 @@ import { verifyToken } from "@/lib/auth";
 import { useRouter } from "next/navigation";
 import NewAppointment from "@/components/NewAppointment";
 import ListAppointment from "@/components/ListAppointment";
+import { useEffect, useState } from "react";
 
 export default function Dashboard() {
-    const token = localStorage.getItem("token");
-    const user = localStorage.getItem("user");
-    const role = localStorage.getItem("role");
     const Router = useRouter();
-
+    const [token, setToken] = useState<string | null>(null);
+    const [user, setUser] = useState<string | null>(null);
+    const [role, setRole] = useState<string | null>(null);
+    
+    useEffect(() => {
+        setToken(localStorage.getItem("token"));
+        setUser(localStorage.getItem("user"));
+        setRole(localStorage.getItem("role"));
+    }, []);
     if (!token || !user || !role || !verifyToken(token, user, role)) {
         Router.push('/login');
         return null;
@@ -18,11 +24,11 @@ export default function Dashboard() {
 
     return (
         <>
-        <img className="absolute w-50 h-13 top-2 left-2" src="/clickbeader_logo.webp" alt="ClickBeader Logo" />
-        <div className="dashboardContainer">
-            <NewAppointment role={role} />
-            <ListAppointment role={role} />
-        </div>
+            <img className="absolute w-50 h-13 top-2 left-2" src="/clickbeader_logo.webp" alt="ClickBeader Logo" />
+            <div className="dashboardContainer">
+                <NewAppointment role={role} />
+                <ListAppointment role={role} />
+            </div>
         </>
     )
 
