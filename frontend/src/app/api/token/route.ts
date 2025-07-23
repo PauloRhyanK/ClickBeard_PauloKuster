@@ -5,8 +5,9 @@ import { NextRequest, NextResponse } from "next/server";
 export async function POST(request: NextRequest) {
     try {
         const [token, user, role] = await request.json();
-        const res = await axios.post("http://localhost:3002/token", {token, user, role});
-        if(res.status >= 200 && res.status < 300) {            
+        const baseUrl = process.env.NEXT_PUBLIC_API_BASE_URL || '';
+        const res = await axios.post(`${baseUrl}/token`, {token, user, role});
+        if(res.status >= 200 && res.status < 300) {
             return NextResponse.json({ response: res.data, message: "Token Válido!" });
         }
     }catch (error: unknown) {

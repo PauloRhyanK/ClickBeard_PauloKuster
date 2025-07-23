@@ -7,8 +7,9 @@ export async function POST(request: NextRequest) {
     try {
         body = await request.json();
         const { name, email, password, type, date, appointments } = body
-        const res = await axios.post("http://localhost:3002/register", { name, email, password, type, date, appointments });
-        if(res.status >= 200 && res.status < 300) {            
+        const baseUrl = process.env.NEXT_PUBLIC_API_BASE_URL || '';
+        const res = await axios.post(`${baseUrl}/register`, { name, email, password, type, date, appointments });
+        if(res.status >= 200 && res.status < 300) {
             return NextResponse.json({ response: res.data, message: "Cadastro realizado com sucesso!" });
         }
     }catch (error: unknown) {

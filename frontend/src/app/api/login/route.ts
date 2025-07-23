@@ -36,8 +36,9 @@ export async function POST(request: NextRequest) {
             );
         }
         
-        
-        const response = await axios.post('http://localhost:3002/login', { 
+        const baseUrl = process.env.NEXT_PUBLIC_API_BASE_URL || '';[]
+
+        const response = await axios.post(`${baseUrl}/login`, { 
             email: sanitizedEmail, 
             password: sanitizedPassword 
         });

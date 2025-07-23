@@ -15,7 +15,7 @@ export async function GET(request: NextRequest) {
         }
 
         const formattedDate = date ? new Date(date).toISOString().slice(0, 10) : "";
-        let baseUrl = 'http://localhost:3002/dashboard?date=' + formattedDate ;     
+        let baseUrl = `${process.env.NEXT_PUBLIC_API_BASE_URL || ''}/dashboard?date=${formattedDate}`;
         baseUrl += `&barber_id=${user}&role=${role}`;
         const response = await axios.get(baseUrl, {
             headers: {

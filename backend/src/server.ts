@@ -14,5 +14,6 @@ app.get('/', (_, res) => {
 });
 
 app.listen(PORT, () => {
-  console.log(`Servidor rodando em http://localhost:${PORT}`);
+  const baseUrl = process.env.NEXT_PUBLIC_API_BASE_URL || '';
+  console.log(`Servidor rodando em ${baseUrl}:${PORT}`);
 });

@@ -32,8 +32,8 @@ export async function POST(request: NextRequest) {
             user_type: role,
         };
 
-        const baseUrl = 'http://localhost:3002/appointments';
-        const response = await axios.post(baseUrl, appointmentData, {
+        const baseUrl = process.env.NEXT_PUBLIC_API_BASE_URL || '';
+        const response = await axios.post(`${baseUrl}/appointments`, appointmentData, {
             headers: {
                 Authorization: `Bearer ${token}`,
                 'Content-Type': 'application/json'

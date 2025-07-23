@@ -21,7 +21,7 @@ export async function GET(request: NextRequest) {
         }
 
         
-        const baseUrl = 'http://localhost:3002/dashboard';
+        const baseUrl = process.env.NEXT_PUBLIC_API_BASE_URL || '';
         const params = new URLSearchParams();
         
         const queryDate = date || new Date().toLocaleDateString('pt-BR');
