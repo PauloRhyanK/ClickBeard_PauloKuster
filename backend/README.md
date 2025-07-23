@@ -1,6 +1,36 @@
 
 # ClickBeard Backend
 
+## Fluxo de Login de Usuário
+
+O fluxo de login de usuário segue as etapas abaixo:
+
+1. **Envio dos dados:**
+   - O usuário envia um JSON com `email` e `pass` para o endpoint `/users/login`.
+   - Ambos os campos são obrigatórios.
+
+2. **Validação dos dados:**
+   - Se faltar algum campo, retorna 400 com mensagem de dados inválidos.
+
+3. **Busca do usuário:**
+   - O sistema procura o usuário pelo e-mail informado.
+   - Se não encontrar, retorna 400 com mensagem de dados inválidos.
+
+4. **Validação da senha:**
+   - A senha enviada é comparada com o hash salvo no banco usando bcrypt.
+   - Se não bater, retorna 400 com mensagem de dados inválidos.
+
+5. **Geração do token JWT:**
+   - Se o login for bem-sucedido, é gerado um token JWT contendo o id, role, email e nome do usuário.
+   - O token tem validade de 1 dia.
+
+6. **Resposta:**
+   - Retorna 200 com o token JWT e os dados do usuário (nome, email, role).
+
+**Observações:**
+- O token JWT deve ser guardado pelo cliente e enviado em endpoints protegidos.
+- O campo `role` define o tipo de acesso do usuário (client, barber, admin).
+ 
 ## Fluxo de Registro de Usuário
 
 O fluxo de registro de usuário foi implementado com as seguintes etapas:
@@ -32,6 +62,7 @@ Os testes de registro de usuário garantem que:
   - Não é possível cadastrar com tipo inválido.
   - Não é possível cadastrar e-mail duplicado.
   - O banco é limpo antes de cada teste para evitar conflitos.
+
 
 
 ## Fluxo de Autorização e Listagem de Clientes
