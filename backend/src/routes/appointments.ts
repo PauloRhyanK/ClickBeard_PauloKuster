@@ -10,7 +10,6 @@ router.post('/', authenticateToken, async (req: AuthRequest, res) => {
   try {
     const { date, hour, email_barber, email_client, speciality } = req.body;
     const userRole = req.user?.role;
-    console.log('User role:', userRole);
     if (!date || !hour || !email_barber || !email_client || !speciality) {
       return res.status(400).json({ success: false, message: 'Campos obrigatórios ausentes' });
     }
@@ -66,4 +65,95 @@ router.post('/', authenticateToken, async (req: AuthRequest, res) => {
   }
 });
 
+// GET /appointments/list
+router.get('/list', authenticateToken, async (req: AuthRequest, res) => {
+  const { date, email_user } = req.query;
+  const userRole = req.user?.role;
+  const userId = req.user?.id;
+  let appointments = [];
+
+  try {
+    if (userRole === 'client') {
+      if (userId === undefined) {
+        console.log('User ID not found in request');  
+        return res.status(400).json({ success: false, message: 'ID do usuário não encontrado' });
+      }
+      const client = await prisma.users.findFirst({ where: { id_user: BigInt(userId), type_user: 'client' } });
+      if (!client) return res.status(200).json({ success: true, message: 'Sem dados' });
+      appointments = await prisma.appointments.findMany({
+        where: { id_client: client.id_user },
+        orderBy: { appointment_time: 'desc' },
+        take: 50,
+        include: {
+          barber: { select: { name_user: true, email_user: true } },
+          speciality: { select: { nm_speciality: true } },
+          client: { select: { name_user: true, email_user: true } }
+        }
+      });
+    } else if (userRole === 'barber') {
+      if (!date) return res.status(400).json({ success: false, message: 'Data obrigatória' });
+      if (userId === undefined) return res.status(400).json({ success: false, message: 'ID do usuário não encontrado' });
+      const barber = await prisma.users.findFirst({ where: { id_user: BigInt(userId), type_user: 'barber' } });
+      if (!barber) return res.status(200).json({ success: false, message: 'Sem dados' });
+      appointments = await prisma.appointments.findMany({
+        where: {
+          id_barber: barber.id_user,
+          appointment_time: {
+            gte: new Date(date + 'T00:00:00.000Z'),
+            lt: new Date(date + 'T23:59:59.999Z')
+          }
+        },
+        include: {
+          barber: { select: { name_user: true, email_user: true } },
+          speciality: { select: { nm_speciality: true } },
+          client: { select: { name_user: true, email_user: true } }
+        }
+      });
+    } else if (userRole === 'admin') {
+
+      if (!date) return res.status(400).json({ success: false, message: 'Data obrigatória' });
+      let where: any = {
+        appointment_time: {
+          gte: new Date(date + 'T00:00:00.000Z'),
+          lt: new Date(date + 'T23:59:59.999Z')
+        }
+      };
+      if (email_user) {
+  
+        const user = await prisma.users.findFirst({ where: { email_user: String(email_user) } });
+        if (user) {
+          if (user.type_user === 'client') where.id_client = user.id_user;
+          if (user.type_user === 'barber') where.id_barber = user.id_user;
+        }
+      }
+      appointments = await prisma.appointments.findMany({
+        where,
+        include: {
+          barber: { select: { name_user: true, email_user: true } },
+          speciality: { select: { nm_speciality: true } },
+          client: { select: { name_user: true, email_user: true } }
+        }
+      });
+    } else {
+      return res.status(403).json({ success: false, message: 'Acesso negado' });
+    }
+
+    if (!appointments.length) {
+      return res.status(200).json({ success: false, message: 'Sem dados' });
+    }
+
+    const result = appointments.map(app => ({
+      date: app.appointment_time.toISOString().substring(0, 10),
+      hour: app.appointment_time.toISOString().substring(11, 16),
+      barber: { name: app.barber.name_user, email: app.barber.email_user },
+      speciality: [app.speciality.nm_speciality],
+      client: { name: app.client.name_user, email: app.client.email_user }
+    }));
+    return res.status(200).json({ success: true, appointments: result });
+  } catch (err) {
+    return res.status(500).json({ success: false, message: 'Erro ao buscar agendamentos', details: err instanceof Error ? err.message : err });
+  }
+});
+
 export default router;
+
