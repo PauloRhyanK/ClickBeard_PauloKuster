@@ -1,4 +1,3 @@
-
 # ClickBeard Backend
 
 ## Fluxo de Login de Usuário
@@ -53,6 +52,30 @@ O fluxo de registro de usuário foi implementado com as seguintes etapas:
 
 5. **Resposta:**
    - Se tudo ocorrer bem, retorna 201 e `{ success: true }`.
+
+## Fluxo de Listagem de Horários e Barbeiros
+
+O endpoint `/hours` permite consultar os horários disponíveis para agendamento em uma data específica, além de listar os barbeiros, suas especialidades e horários já ocupados.
+
+### Regras e Fluxo
+
+1. **Autenticação obrigatória:**
+   - O usuário deve enviar um token JWT válido no header `Authorization`.
+2. **Envio da data:**
+   - O parâmetro `date` (formato `YYYY-MM-DD`) deve ser enviado via query string.
+   - Se não enviar a data, retorna 400.
+3. **Consulta de barbeiros:**
+   - O sistema busca todos os barbeiros cadastrados.
+   - Se não houver barbeiros, retorna `{ success: false, message: 'Sem dados' }`.
+4. **Montagem dos horários:**
+   - Para cada horário padrão do dia, verifica se todos os barbeiros estão ocupados naquele horário.
+   - O campo `selected` será `true` se todos os barbeiros estiverem ocupados, e `false` se pelo menos um barbeiro estiver livre.
+5. **Montagem dos barbeiros:**
+   - Para cada barbeiro, retorna nome, email, especialidades e horários já marcados.
+6. **Resposta:**
+   - Se houver dados, retorna `{ success: true, hours, barbers }`.
+   - Se não houver barbeiros, retorna `{ success: false, message: 'Sem dados' }`.
+
 
 ## Testes Automatizados
 
@@ -170,3 +193,43 @@ curl -H "Authorization: Bearer <jwt_token>" http://localhost:3000/users/clients
     "message": "Dados invalidos"
   }
   ```
+
+
+### GET /hours
+
+**Descrição:** Lista horários disponíveis para agendamento e barbeiros, para uma data específica.
+
+**Headers:**
+- Authorization: Bearer `<jwt_token>`
+
+**Query Params:**
+- `date` (obrigatório): Data no formato `YYYY-MM-DD`.
+
+**Respostas:**
+- 200 (com dados):
+  ```json
+  {
+    "success": true,
+    "hours": [
+      { "hour": "09:00", "selected": false },
+      { "hour": "10:00", "selected": true }
+    ],
+    "barbers": [
+      {
+        "name": "Barber",
+        "email": "barber@teste.com",
+        "specialities": ["Corte", "Barba"],
+        "appointments": ["09:00", "10:00"]
+      }
+    ]
+  }
+  ```
+- 200 (sem barbeiros): `{ "success": false, "message": "Sem dados" }`
+- 400: `{ "success": false, "message": "Data obrigatória" }`
+- 401: `{ "error": "Token inválido ou ausente" }`
+
+**Exemplo de uso com curl:**
+```bash
+curl -H "Authorization: Bearer <jwt_token>" "http://localhost:3000/hours?date=2025-07-22"
+```
+
