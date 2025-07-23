@@ -46,7 +46,7 @@ router.get('/', authenticateToken, async (req, res) => {
   });
 
   const hours = DEFAULT_HOURS.map(hour => {
-    const selected = barbers.every(barber =>
+    const selected = barbers.every((barber: { appointments_barber: any[]; }) =>
       barber.appointments_barber.some(app => {
         const appHour = app.appointment_time.toISOString().substring(11, 16);
         return appHour === hour;
@@ -55,7 +55,7 @@ router.get('/', authenticateToken, async (req, res) => {
     return { hour, selected };
   });
 
-  const barbersArr = barbers.map(barber => ({
+  const barbersArr = barbers.map((barber: { name_user: any; email_user: any; barber_specialities: any[]; appointments_barber: any[]; }) => ({
     name: barber.name_user,
     email: barber.email_user,
     specialities: barber.barber_specialities.map(bs => bs.speciality.nm_speciality),

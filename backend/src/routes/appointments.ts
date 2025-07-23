@@ -189,7 +189,7 @@ router.get('/list', authenticateToken, async (req: AuthRequest, res) => {
       return res.status(200).json({ success: false, message: 'Sem dados' });
     }
 
-    const result = appointments.map(app => ({
+    const result = appointments.map((app: { appointment_time: { toISOString: () => string; }; barber: { name_user: any; email_user: any; }; speciality: { nm_speciality: any; }; client: { name_user: any; email_user: any; }; }) => ({
       date: app.appointment_time.toISOString().substring(0, 10),
       hour: app.appointment_time.toISOString().substring(11, 16),
       barber: { name: app.barber.name_user, email: app.barber.email_user },

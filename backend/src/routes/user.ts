@@ -92,7 +92,7 @@ router.get('/clients', authenticateToken, authorizeAdminOrBarber, async (req: Au
       created_at: true,
     },
   });
-  const clientsSerialized = clients.map(c => ({
+  const clientsSerialized = clients.map((c: { id_user: { toString: () => any; }; }) => ({
     ...c,
     id_user: c.id_user.toString(),
   }));
