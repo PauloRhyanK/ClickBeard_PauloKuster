@@ -51,6 +51,9 @@ export default async function globalSetup() {
   });
 
   const barber = await prisma.users.findUnique({ where: { email_user: 'barber@teste.com' } });
+  if (!barber) {
+    throw new Error("Barber user not found");
+  }
   await prisma.barber_Specialities.create({
     data: {
       id_user: barber.id_user,

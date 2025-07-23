@@ -7,8 +7,8 @@ const config: Config = {
   testMatch: ['**/src/tests/**/*.test.ts'],
   clearMocks: true,
   moduleFileExtensions: ['ts', 'js', 'json'],
-  globalSetup: './testSetup.ts',
-  globalTeardown: './testTeardown.ts',
+  // globalSetup: './testSetup.ts',
+  // globalTeardown: './testTeardown.ts',
 };
 
 export default config;

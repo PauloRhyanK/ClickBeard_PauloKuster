@@ -10,22 +10,22 @@ describe('POST /appointments', () => {
   let adminToken: string;
 
   beforeAll(async () => {
-    // Busca usuários já criados pelo testSetup
-    const client = await prisma.users.findUnique({ where: { email_user: 'client@teste.com' } });
-    const barber = await prisma.users.findUnique({ where: { email_user: 'barber@teste.com' } });
-    const admin = await prisma.users.findUnique({ where: { email_user: 'admin@teste.com' } });
+    const client = await prisma.users.findFirst({ where: { email_user: 'client@teste.com', type_user: 'client' } });
+    const barber = await prisma.users.findFirst({ where: { email_user: 'barber@teste.com', type_user: 'barber' } });
+    const admin = await prisma.users.findFirst({ where: { email_user: 'admin@teste.com', type_user: 'admin' } });
+    const JWT_SECRET = process.env.JWT_SECRET || 'NotSet';
     if (!client) throw new Error('Client not found');
     if (!barber) throw new Error('Barber not found');
     if (!admin) throw new Error('Admin not found');
-    const JWT_SECRET = process.env.JWT_SECRET || 'NotSet';
     clientToken = jwt.sign({ id: client.id_user.toString(), role: 'client' }, JWT_SECRET);
     barberToken = jwt.sign({ id: barber.id_user.toString(), role: 'barber' }, JWT_SECRET);
     adminToken = jwt.sign({ id: admin.id_user.toString(), role: 'admin' }, JWT_SECRET);
+    console.log('Tokens gerados:', { clientToken, barberToken, adminToken });
   });
 
   it('deve criar agendamento com sucesso', async () => {
     const res = await request(app)
-      .post('/appointment')
+      .post('/appointments')
       .set('Authorization', `Bearer ${clientToken}`)
       .send({
         date: '2025-07-23',
@@ -40,7 +40,7 @@ describe('POST /appointments', () => {
 
   it('deve recusar se data for retroativa', async () => {
     const res = await request(app)
-      .post('/appointment')
+      .post('/appointments')
       .set('Authorization', `Bearer ${clientToken}`)
       .send({
         date: '2020-01-01',
@@ -49,7 +49,7 @@ describe('POST /appointments', () => {
         email_client: 'client@teste.com',
         speciality: 'Corte'
       });
-    expect(res.statusCode).toBe(201);
+    expect(res.statusCode).toBe(400);
     expect(res.body.success).toBe(false);
     expect(res.body.message).toMatch(/retroativa/i);
   });
@@ -68,7 +68,7 @@ describe('POST /appointments', () => {
       }
     });
     const res = await request(app)
-      .post('/appointment')
+      .post('/appointments')
       .set('Authorization', `Bearer ${clientToken}`)
       .send({
         date: '2025-07-23',
@@ -77,14 +77,14 @@ describe('POST /appointments', () => {
         email_client: 'client@teste.com',
         speciality: 'Corte'
       });
-    expect(res.statusCode).toBe(201);
+    expect(res.statusCode).toBe(400);
     expect(res.body.success).toBe(false);
     expect(res.body.message).toMatch(/ocupado|livre/i);
   });
 
   it('deve recusar se barbeiro não existir', async () => {
     const res = await request(app)
-      .post('/appointment')
+      .post('/appointments')
       .set('Authorization', `Bearer ${clientToken}`)
       .send({
         date: '2025-07-23',
@@ -93,14 +93,14 @@ describe('POST /appointments', () => {
         email_client: 'client@teste.com',
         speciality: 'Corte'
       });
-    expect(res.statusCode).toBe(201);
+    expect(res.statusCode).toBe(400);
     expect(res.body.success).toBe(false);
     expect(res.body.message).toMatch(/barbeiro/i);
   });
 
   it('deve recusar se cliente não existir', async () => {
     const res = await request(app)
-      .post('/appointment')
+      .post('/appointments')
       .set('Authorization', `Bearer ${clientToken}`)
       .send({
         date: '2025-07-23',
@@ -109,7 +109,7 @@ describe('POST /appointments', () => {
         email_client: 'naoexiste@teste.com',
         speciality: 'Corte'
       });
-    expect(res.statusCode).toBe(201);
+    expect(res.statusCode).toBe(400);
     expect(res.body.success).toBe(false);
     expect(res.body.message).toMatch(/cliente/i);
   });

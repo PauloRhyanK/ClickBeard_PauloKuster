@@ -16,43 +16,13 @@ const testEmails = [
 ];
 
 beforeEach(async () => {
-  await prisma.users.deleteMany({
-    where: { email_user: { in: testEmails } }
-  });
-  const admin = await prisma.users.create({
-    data: {
-      name_user: 'Admin',
-      email_user: 'admin@teste.com',
-      pass_user: await require('bcrypt').hash('123456', 10),
-      type_user: 'admin',
-    },
-  });
-  const barber = await prisma.users.create({
-    data: {
-      name_user: 'Barber',
-      email_user: 'barber@teste.com',
-      pass_user: await require('bcrypt').hash('123456', 10),
-      type_user: 'barber',
-    },
-  });
-  const client = await prisma.users.create({
-    data: {
-      name_user: 'Client',
-      email_user: 'client@teste.com',
-      pass_user: await require('bcrypt').hash('123456', 10),
-      type_user: 'client',
-    },
-  });
+
   const JWT_SECRET = process.env.JWT_SECRET || 'NotSet';
-  adminToken = jwt.sign({ id: admin.id_user.toString(), role: 'admin' }, JWT_SECRET);
-  barberToken = jwt.sign({ id: barber.id_user.toString(), role: 'barber' }, JWT_SECRET);
-  clientToken = jwt.sign({ id: client.id_user.toString(), role: 'client' }, JWT_SECRET);
+  adminToken = jwt.sign({ id: 'admin-id', role: 'admin' }, JWT_SECRET);
+  barberToken = jwt.sign({ id: 'barber-id', role: 'barber' }, JWT_SECRET);
+  clientToken = jwt.sign({ id: 'client-id', role: 'client' }, JWT_SECRET);
 });
 
-afterAll(async () => {
-  await prisma.users.deleteMany({ where: { email_user: { in: testEmails } } });
-  await prisma.$disconnect();
-});
 
 describe('GET /users/clients', () => {
   it('permite acesso para admin e retorna clientes', async () => {
