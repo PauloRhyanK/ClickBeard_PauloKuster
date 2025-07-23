@@ -9,8 +9,9 @@ export async function GET(request: NextRequest) {
             return NextResponse.json({ error: "Token Required" }, { status: 401 });
         }
 
-        const baseUrl = 'http://localhost:3002/clients';
-        const response = await axios.get(baseUrl, {
+        const baseUrl = process.env.NEXT_PUBLIC_API_BASE_URL || 'http://localhost:3002/clients';
+        const url = baseUrl + '/users/clients';
+        const response = await axios.get(url, {
             headers: {
                 Authorization: `Bearer ${token}`,
                 'Content-Type': 'application/json'
