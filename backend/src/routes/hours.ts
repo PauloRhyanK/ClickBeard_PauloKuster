@@ -14,6 +14,7 @@ for (let h = 8; h <= 18; h++) {
     }
 }
 
+// GET /hours
 router.get('/', authenticateToken, async (req, res) => {
   const date = req.query.date as string;
   if (!date) {
