@@ -2,7 +2,7 @@
 
 import axios from "axios";
 import Image from "next/image";
-import { useState } from "react";
+import { use, useEffect, useState } from "react";
 
 export default function Register() {
     const [formData, setFormData] = useState({
@@ -13,7 +13,7 @@ export default function Register() {
         date: '',
         appointments: [] as string[]
     });
-
+    const [isBarber, setIsBarber] = useState(false);
 
     const updateField = (field: string, value: string | string[]) => {
         setFormData(prev => ({
@@ -47,26 +47,34 @@ export default function Register() {
                 return;
             }
             alert("Registrando usuário...");
-            const res = await axios.post("/api/register", {
+            const payload: any = {
                 name: formData.name.trim(),
                 email: formData.email.trim().toLowerCase(),
                 password: formData.password.trim(),
                 type: formData.type,
-                date: formData.date,
                 appointments: formData.appointments
-            })
+            };
+            if (formData.date) {
+                payload.date = new Date(formData.date).toISOString();
+                payload.age = new Date().getFullYear() - new Date(formData.date).getFullYear();
+            }
+            const res = await axios.post("/api/register", payload)
             if (res.status >= 200 && res.status < 300) {
-                alert("Cadastro realizado com sucesso!");
-                setFormData({
-                    name: '',
-                    email: '',
-                    password: '',
-                    type: '',
-                    date: '',
-                    appointments: []
-                });
+                if(res.data.success == true) {
+                    alert("Cadastro realizado com sucesso!");
+                    setFormData({
+                        name: '',
+                        email: '',
+                        password: '',
+                        type: '',
+                        date: '',
+                        appointments: []
+                    });
+                }else {
+                    alert("Erro ao cadastrar usuário, verifique os dados.");
+                }
             } else {
-                alert("Erro ao cadastrar usuário, , tente novamente mais tarde.");
+                alert("Erro ao cadastrar usuário, tente novamente mais tarde.");
             }
         } catch (error: unknown) {
             alert("Erro ao cadastrar usuário, tente novamente mais tarde.");
@@ -77,6 +85,15 @@ export default function Register() {
     function handleTypeChange(type: string) {
         updateField("type", type);
     }
+
+    useEffect(() => {
+        if(formData.type === "barber") {
+            setIsBarber(true);
+        }else {
+            setIsBarber(false);
+        }
+
+    }, [formData.type]);
 
     return <>
         <header className="m-5 mt-10">
@@ -123,12 +140,12 @@ export default function Register() {
                         </div>
                         <div className="flex flex-col gap-2">
                             <label className="label" htmlFor="appointment_usuas">Especialidade</label>
-                            <select multiple id="appointment_usuas" size={5} value={formData.appointments} onChange={handleAppointmentsChange} className="select">
+                            <select disabled={!isBarber} multiple id="appointment_usuas" size={5} value={formData.appointments} onChange={handleAppointmentsChange} className="select">
                                 <option value="Cabelo">Cabelo</option>
                                 <option value="Barba">Barba</option>
                                 <option value="Sobrancelha">Sobrancelha</option>
                                 <option value="Implante">Implante</option>
-                                <option value="Implante">Hidratação</option>
+                                <option value="Hidratação">Hidratação</option>
                             </select>
                             <p className="obs-color text-xs	">Segure <code>CTRL</code> para multipla escolha</p>
                             {
