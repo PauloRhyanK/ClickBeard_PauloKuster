@@ -71,7 +71,10 @@ export default function Register() {
                         appointments: []
                     });
                 }else {
-                    alert("Erro ao cadastrar usuário, verifique os dados.");
+                    if(res.data.error) {
+                        alert(res.data.error);
+                    }
+                    alert("Erro ao cadastrar usuário, tente novamente mais tarde.");
                 }
             } else {
                 alert("Erro ao cadastrar usuário, tente novamente mais tarde.");
