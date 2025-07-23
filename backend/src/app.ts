@@ -18,9 +18,6 @@ app.get('/', (req, res) => {
   res.send('API rodando!');
 });
 
-
-
-
 app.use('/users', usersRoutes);
 app.use('/hours', hoursRoutes);
 app.use('/appointments', appointmentRoutes);

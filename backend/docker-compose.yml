@@ -22,10 +22,10 @@ services:
       PORT: 3333
       JWT_SECRET: NotSet
     ports:
-      - '3000:3000'
+      - '3333:3333'
     depends_on:
       - db
-    command: sh -c "npx prisma migrate deploy && npm run build && npm start"
+    command: sh -c "npx prisma generate && npx prisma migrate deploy && npm run build && npm start"
 
 volumes:
   postgres_data:
