@@ -4,8 +4,10 @@ import cors from 'cors';
 import { authenticateToken } from './middleware/authMiddleware';
 import { notFoundHandler } from './middleware/notFoundHandler';
 
+
 import usersRoutes from './routes/user';
 import hoursRoutes from './routes/hours';
+import appointmentRoutes from './routes/appointments';
 
 dotenv.config();
 const app = express();
@@ -18,8 +20,10 @@ app.get('/', (req, res) => {
 
 
 
+
 app.use('/users', usersRoutes);
 app.use('/hours', hoursRoutes);
+app.use('/appointments', appointmentRoutes);
 
 
 // Handler para rotas não encontradas
