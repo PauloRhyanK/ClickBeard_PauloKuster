@@ -161,6 +161,73 @@ O endpoint `/appointments` permite que um cliente agende um horário com um barb
 ```bash
 curl -H "Authorization: Bearer <jwt_token>" http://localhost:3000/users/clients
 ```
+---
+### GET /appointments/list
+
+**Descrição:** Lista agendamentos conforme o papel do usuário autenticado. O retorno e os filtros variam para client, barber e admin.
+
+**Headers:**
+- Authorization: Bearer `<jwt_token>`
+
+**Query Params:**
+- `date` (obrigatório para barber e admin): Data no formato `YYYY-MM-DD`.
+- `email_user` (opcional, apenas para admin): E-mail do cliente ou barbeiro para filtrar os agendamentos.
+
+**Regras e Fluxo:**
+1. **Autenticação obrigatória:**
+   - O usuário deve enviar um token JWT válido no header `Authorization`.
+2. **Acesso por papel:**
+   - `client`: lista apenas seus próprios agendamentos (não precisa enviar `date`).
+   - `barber`: lista seus agendamentos do dia informado em `date` (obrigatório).
+   - `admin`: lista todos os agendamentos do dia informado em `date` (obrigatório), podendo filtrar por `email_user` (cliente ou barbeiro).
+3. **Restrições:**
+   - Se não houver agendamentos, retorna `{ success: false, message: 'Sem dados' }`.
+   - Se faltar parâmetro obrigatório, retorna 400 com mensagem adequada.
+   - Se papel não for permitido, retorna 403.
+4. **Formato do retorno:**
+   - Cada agendamento traz: `date`, `hour`, `barber` (nome, email), `client` (nome, email), `speciality` (array).
+
+**Respostas:**
+- 200 (com dados):
+  ```json
+  {
+    "success": true,
+    "appointments": [
+      {
+        "date": "2025-07-23",
+        "hour": "10:00",
+        "barber": { "name": "Barber", "email": "barber@teste.com" },
+        "speciality": ["Corte"],
+        "client": { "name": "Client", "email": "client@teste.com" }
+      }
+    ]
+  }
+  ```
+- 200 (sem dados): `{ "success": false, "message": "Sem dados" }`
+- 400: `{ "success": false, "message": "<motivo>" }`
+- 401: `{ "error": "Token inválido ou ausente" }`
+- 403: `{ "success": false, "message": "Acesso negado" }`
+- 500: `{ "success": false, "message": "Erro ao buscar agendamentos", "details": "..." }`
+
+**Exemplo de uso com curl:**
+Para cliente:
+```bash
+curl -H "Authorization: Bearer <jwt_token>" http://localhost:3000/appointments/list
+```
+Para barbeiro:
+```bash
+curl -H "Authorization: Bearer <jwt_token>" "http://localhost:3000/appointments/list?date=2025-07-23"
+```
+Para admin (todos do dia):
+```bash
+curl -H "Authorization: Bearer <jwt_token>" "http://localhost:3000/appointments/list?date=2025-07-23"
+```
+Para admin filtrando por e-mail:
+```bash
+curl -H "Authorization: Bearer <jwt_token>" "http://localhost:3000/appointments/list?date=2025-07-23&email_user=client@teste.com"
+```
+
+---
 
 ### POST /users/register
 
@@ -289,3 +356,4 @@ curl -X POST -H "Authorization: Bearer <jwt_token>" -H "Content-Type: applicatio
   -d '{"date":"2025-07-23","hour":"10:00","email_barber":"barber@teste.com","email_client":"client@teste.com","speciality":"Corte"}' \
   http://localhost:3000/appointments
 ```
+
