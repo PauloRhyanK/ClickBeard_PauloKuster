@@ -1,15 +1,57 @@
+
 import { Router } from 'express';
 import bcrypt from 'bcrypt';
 import { PrismaClient } from '@prisma/client';
+import jwt from 'jsonwebtoken';
 
-const router = Router();
 const prisma = new PrismaClient();
+const router = Router();
 
-// POST /register
+// POST /login
+router.post('/login', async (req, res) => {
+  try {
+    const { email, pass } = req.body;
+    if (!email || !pass) {
+      return res.status(400).json({ success: false, message: 'Dados invalidos' });
+    }
+    const user = await prisma.users.findUnique({ where: { email_user: email } });
+    if (!user) {
+      return res.status(400).json({ success: false, message: 'Dados invalidos' });
+    }
+    const valid = await bcrypt.compare(pass, user.pass_user);
+    if (!valid) {
+      return res.status(400).json({ success: false, message: 'Dados invalidos' });
+    }
+    const JWT_SECRET = process.env.JWT_SECRET || "NotSet";
+    const token = jwt.sign(
+      {
+        id: user.id_user.toString(),
+        role: user.type_user,
+        email: user.email_user,
+        name: user.name_user,
+      },
+      JWT_SECRET,
+      { expiresIn: '1d' }
+    );
+
+    return res.status(200).json({
+      success: true,
+      token,
+      user: {
+        name: user.name_user,
+        email: user.email_user,
+        role: user.type_user,
+      },
+    });
+  } catch (err) {
+    console.error('Erro no login:', err);
+    return res.status(500).json({ success: false, message: 'Erro interno', error: err instanceof Error ? err.message : err });
+  }
+});
+
 router.post('/register', async (req, res) => {
   const { name_user, email_user, pass_user, type_user, age_user, hiring_date } = req.body;
 
-  // Validação básica
   if (!name_user || !email_user || !pass_user || !type_user) {
     return res.status(400).json({ error: 'Parâmetros obrigatórios ausentes' });
   }
@@ -17,16 +59,11 @@ router.post('/register', async (req, res) => {
     return res.status(400).json({ error: 'Tipo de usuário inválido' });
   }
 
-  // Verifica se o email já existe
   const existingUser = await prisma.users.findUnique({ where: { email_user: email_user } });
   if (existingUser) {
     return res.status(400).json({ error: 'E-mail já cadastrado' });
   }
-
-  // Criptografa a senha
   const hashedPassword = await bcrypt.hash(pass_user, 10);
-
-  // Cria o usuário
   const user = await prisma.users.create({
     data: {
       name_user,
@@ -37,7 +74,6 @@ router.post('/register', async (req, res) => {
       hiring_date,
     },
   });
-
   return res.status(201).json({ success: true });
 });
 

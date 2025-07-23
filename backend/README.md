@@ -58,3 +58,36 @@ Os testes de registro de usuário garantem que:
 - 400: `{ "error": "E-mail já cadastrado" }`
 
 ---
+
+### POST /users/login
+
+**Descrição:** Realiza o login do usuário e retorna um token JWT e dados do usuário.
+
+**Body JSON:**
+```
+{
+  "email": "email@exemplo.com",
+  "pass": "senha123"
+}
+```
+
+**Respostas:**
+- 200: 
+  ```json
+  {
+    "success": true,
+    "token": "<jwt_token>",
+    "user": {
+      "name": "Nome do Usuário",
+      "email": "email@exemplo.com",
+      "role": "client" // ou "barber"
+    }
+  }
+  ```
+- 400: 
+  ```json
+  {
+    "success": false,
+    "message": "Dados invalidos"
+  }
+  ```
