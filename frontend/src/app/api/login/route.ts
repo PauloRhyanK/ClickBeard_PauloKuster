@@ -18,7 +18,7 @@ export async function POST(request: NextRequest) {
                 { status: 400 }
             );
         }
-        const sanitizedEmail = email.trim().toLowerCase();
+        const sanitizedEmail = email.trim();
         const sanitizedPassword = password.trim();
         
         if (sanitizedPassword.length < 3) {
