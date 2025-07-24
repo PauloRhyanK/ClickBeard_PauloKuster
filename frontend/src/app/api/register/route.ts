@@ -11,7 +11,6 @@ export async function POST(request: NextRequest) {
             pass_user: string;
             type_user: string;
             age_user?: number;
-            hiring_date?: Date;
             appointments?: string[];
         } = {
             name_user: body.name,
@@ -19,7 +18,6 @@ export async function POST(request: NextRequest) {
             pass_user: body.password,
             type_user: body.type,
             age_user: body.age,
-            hiring_date: body.date ? new Date(body.date) : undefined,
             appointments: body.appointments && body.type == "barber" ? body.appointments : undefined
         };
         const baseUrl = process.env.NEXT_PUBLIC_API_BASE_URL || '';

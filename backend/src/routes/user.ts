@@ -52,7 +52,7 @@ router.post('/login', async (req, res) => {
 
 // POST /users/register
 router.post('/register', async (req, res) => {
-  const { name_user, email_user, pass_user, type_user, age_user, hiring_date, appointments } = req.body;
+  const { name_user, email_user, pass_user, type_user, age_user, appointments } = req.body;
 
   if (!name_user || !email_user || !pass_user || !type_user) {
     return res.status(400).json({ error: 'Parâmetros obrigatórios ausentes' });
@@ -65,6 +65,7 @@ router.post('/register', async (req, res) => {
   if (existingUser) {
     return res.status(400).json({ error: 'E-mail já cadastrado' });
   }
+  const date = new Date();
   const hashedPassword = await bcrypt.hash(pass_user, 10);
   const user = await prisma.users.create({
     data: {
@@ -73,7 +74,7 @@ router.post('/register', async (req, res) => {
       pass_user: hashedPassword,
       type_user,
       age_user,
-      hiring_date,
+      hiring_date: type_user === 'barber' ? date : null,
     },
   });
 
