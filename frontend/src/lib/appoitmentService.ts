@@ -1,7 +1,7 @@
 import axios from "axios";
 import { 
     BarberSlot, 
-    NewAppointmentResponse, 
+    HourResponse, 
     CreateAppointmentData, 
     AppointmentData,
     CreateAppointmentRequest 
@@ -14,7 +14,7 @@ interface HourRequest {
     role: string;
 }
 
-export async function fetchAvailableHours({ date, token, user, role }: HourRequest): Promise<NewAppointmentResponse> {
+export async function fetchAvailableHours({ date, token, user, role }: HourRequest): Promise<HourResponse> {
     if (!date) {
         throw new Error("Date is required");
     }
@@ -24,13 +24,16 @@ export async function fetchAvailableHours({ date, token, user, role }: HourReque
     if (!user) {
         throw new Error("User is required");
     }
-    const baseUrl = '/api/hours?date=' + new Date(date).toISOString().slice(0, 10) + `&user=${user}&role=${role}`;
+    const baseUrl = '/api/hours?date=' + new Date(date).toISOString().slice(0, 10) ;
     try {
         const response = await axios.get(baseUrl, {
             headers: {
                 Authorization: `Bearer ${token}`
             },
         });
+        if(response.data.success !== true) {
+            throw new Error("Invalid date from server");
+        }
         return response.data;
     } catch (error) {
         console.error("Error fetching hours:", error);
@@ -89,18 +92,18 @@ export async function fetchAppointments(role: string): Promise<AppointmentData[]
                 Authorization: `Bearer ${token}`
             }
         });
-        if(role==='barber' || role==='admin') {
-            return response.data.barbers?.flatMap((barber: BarberSlot) =>
-                barber.hours.map(hour => ({
-                    ...hour,
-                    date: hour.date,
-                    barber: barber.name,
-                    hour: hour.hour,
-                    speciality: hour.speciality,
-                    client: hour.client
-                }))
-            ) ?? [] as AppointmentData[];
-        }
+        // if(role==='barber' || role==='admin') {
+        //     return response.data.barbers?.flatMap((barber: BarberSlot) =>
+        //         barber.hours.map(hour => ({
+        //             ...hour,
+        //             date: hour.date,
+        //             barber: barber.name,
+        //             hour: hour.hour,
+        //             speciality: hour.speciality,
+        //             client: hour.client
+        //         }))
+        //     ) ?? [] as AppointmentData[];
+        // }
         return response.data as AppointmentData[];
     } catch (error) {
         console.error("Error fetching appointments:", error);

@@ -116,14 +116,14 @@ const ListAppointment = ({ role }: { role: string }) => {
             </div>
         );
     } else if (isBarber || isAdmin) {
-        const groupAppointmentsByPeriod = (appointments: AppointmentData[]) => {
+        const groupAppointmentsByPeriod = (appointments: AppointmentData[] | undefined | null) => {
             const periods = {
                 morning: [] as AppointmentData[],
                 afternoon: [] as AppointmentData[],
                 night: [] as AppointmentData[]
             };
 
-            appointments.forEach(appointment => {
+            (Array.isArray(appointments) ? appointments : []).forEach(appointment => {
                 const hour = parseInt(appointment.hour.split(':')[0]);
                 if (hour < 12) {
                     periods.morning.push(appointment);

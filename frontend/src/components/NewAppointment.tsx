@@ -1,5 +1,5 @@
 import { fetchAvailableHours, fetchNewAppointment } from "@/lib/appoitmentService";
-import { BarberSlot, HourSlot, ClientsResponse } from "@/types";
+import { BarberSlot, HourSlot, ClientsResponse, HourResponse } from "@/types";
 import { fetchClients,  } from "@/lib/clientService";
 import React, { useState, useEffect } from "react";
 import HoursApointment from "./HoursApointment";
@@ -25,6 +25,7 @@ const NewAppointment: React.FC<NewAppointmentProps> = ({ role }) => {
     const token = localStorage.getItem("token");
     const user = localStorage.getItem("user");
 
+    const [isReady, setIsReady] = useState(false);
     useEffect(() => {
         if (role === "barber") {
             setSelectedBarber(user || "");
@@ -37,14 +38,16 @@ const NewAppointment: React.FC<NewAppointmentProps> = ({ role }) => {
                 try {
                     const clientsData = await fetchClients(token || "");
                     setClients(clientsData);
+                    setIsReady(true);
                 } catch (error) {
                     console.error("Erro ao buscar clientes:", error);
                 }
             }
         };
+        console.log("Clientes3:", clients);
         fetchData();
-    }, [token, userRole]);
-
+    }, [token, userRole, isReady]);
+    
     const getAllSpecialities = (barbersList: BarberSlot[]): string[] => {
         const allSpecs = new Set<string>();
         barbersList.forEach(barber => {
@@ -56,8 +59,8 @@ const NewAppointment: React.FC<NewAppointmentProps> = ({ role }) => {
     };
 
     const isBarberAvailable = (barber: BarberSlot, targetHour: string): boolean => {
-        if (!Array.isArray(barber.hours)) return true;
-        const reservedHour = barber.hours.find(h => h.hour === targetHour);
+        if (!Array.isArray(barber.appointments)) return true;
+        const reservedHour = barber.appointments.find(h => h.hour === targetHour);
         return !reservedHour;
     };
 
@@ -92,21 +95,17 @@ const NewAppointment: React.FC<NewAppointmentProps> = ({ role }) => {
         const fetchData = async () => {
             try {
                 const availableHours = await fetchAvailableHours({ 
-                    date: date.toISOString(), 
-                    token: token || "", 
-                    user: user || "", 
-                    role: userRole 
+                    date: date.toISOString().split('T')[0],
+                    token: token || "",
+                    user: user || "",
+                    role: userRole || ""
                 });
-                const allHours = Array.isArray(availableHours.hoursDay)
-                    ? availableHours.hoursDay.map(hour => ({
-                        hour: hour.hour,
-                        selected: hour.selected
-                    }))
-                    : [];
+                const allHours = availableHours.hours || [];
                 const allBarbersData = availableHours.barbers.map(barber => ({
                     name: barber.name,
+                    email: barber.email,
                     specialities: barber.specialities || [],
-                    hours: barber.hours || [] 
+                    appointments: barber.appointments || [] 
                 }));
                 setHours(allHours);
                 setAllBarbers(allBarbersData);
@@ -253,7 +252,7 @@ const NewAppointment: React.FC<NewAppointmentProps> = ({ role }) => {
                             required={userRole === "admin" || userRole === "barber"}
                         >
                             <option value="">Selecione um cliente...</option>
-                            {clients.map((clientItem, key) => (
+                            {Array.isArray(clients) && clients.map((clientItem, key) => (
                                 <option
                                     key={key}
                                     value={clientItem.id_user}

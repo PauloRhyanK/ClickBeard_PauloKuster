@@ -3,6 +3,12 @@ export interface HourSlot {
     selected: boolean;
 }
 
+export interface HourResponse {
+    success: boolean;
+    hours: HourSlot[];
+    barbers: BarberSlot[];
+}
+
 export interface AppointmentData {
     date: string;
     hour: string;
@@ -14,8 +20,9 @@ export interface AppointmentData {
 
 export interface BarberSlot {
     name: string;
+    email: string;
     specialities: string[];
-    hours: AppointmentData[];
+    appointments: AppointmentData[];
 }
 
 export interface NewAppointmentResponse {

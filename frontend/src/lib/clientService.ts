@@ -14,8 +14,8 @@ export async function fetchClients(token: string): Promise<ClientsResponse[]> {
             },
         });
 
-        const data = response.data as ClientsResponse[];
-        
+        const data = response.data.clients as ClientsResponse[];
+
         if (data) {
             return data || [];
         } else {
