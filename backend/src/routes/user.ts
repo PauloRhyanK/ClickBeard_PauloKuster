@@ -52,7 +52,7 @@ router.post('/login', async (req, res) => {
 
 // POST /users/register
 router.post('/register', async (req, res) => {
-  const { name_user, email_user, pass_user, type_user, age_user, hiring_date } = req.body;
+  const { name_user, email_user, pass_user, type_user, age_user, hiring_date, appointments } = req.body;
 
   if (!name_user || !email_user || !pass_user || !type_user) {
     return res.status(400).json({ error: 'Parâmetros obrigatórios ausentes' });
@@ -76,6 +76,22 @@ router.post('/register', async (req, res) => {
       hiring_date,
     },
   });
+
+  if (type_user === 'barber' && Array.isArray(appointments) && appointments.length > 0) {
+    const especialidades = await prisma.specialties.findMany({
+      where: { nm_speciality: { in: appointments } },
+      select: { id_speciality: true }
+    });
+
+    await prisma.barber_Specialities.createMany({
+      data: especialidades.map((e: { id_speciality: bigint; }) => ({
+        id_user: user.id_user,
+        id_speciality: Number(e.id_speciality)
+      })),
+      skipDuplicates: true
+    });
+  }
+
   return res.status(201).json({ success: true });
 });
 

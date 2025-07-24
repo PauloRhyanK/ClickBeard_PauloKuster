@@ -36,16 +36,15 @@ export async function POST(request: NextRequest) {
             );
         }
         
-        const baseUrl = process.env.NEXT_PUBLIC_API_BASE_URL || '';[]
+        const baseUrl = process.env.NEXT_PUBLIC_API_BASE_URL || '';
 
-        const response = await axios.post(`${baseUrl}/login`, { 
+        const response = await axios.post(`${baseUrl}/users/login`, { 
             email: sanitizedEmail, 
-            password: sanitizedPassword 
+            pass: sanitizedPassword 
         });
         
         if (response.status === 200) {
-            const data = response.data;
-            return NextResponse.json(data);
+            return NextResponse.json(response.data);
         }
 
     } catch (error: unknown) {
@@ -56,7 +55,7 @@ export async function POST(request: NextRequest) {
         }
         
         return NextResponse.json({
-            "error": "Erro interno do servidor"
+            "error": "Erro interno do servidor" + (error instanceof Error ? ": " + error.message : "Sem detalhes")
         }, { status: 500 });
     }
 

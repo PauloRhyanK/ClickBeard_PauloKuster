@@ -25,24 +25,13 @@ export async function loginUser(email: string, password: string): Promise<LoginR
         }
         
         localStorage.setItem("token", res.data.token);
-        localStorage.setItem("role", res.data.user.type_user);
-        localStorage.setItem("user", res.data.user.id_user);
+        localStorage.setItem("role", res.data.user.role);
+        localStorage.setItem("user", res.data.user.email);
+        localStorage.setItem("userName", res.data.user.name);
         
         return res.data;
     } catch (error: unknown) {
-        throw new Error("Login request failed");
-    }
-}
-
-export async function verifyToken(token: string, user: string, role: string ): Promise<boolean> {
-    try {
-        const res = await axios.post("/api/token", { token, user, role });
-        if (res.status !== 200) {
-            throw new Error("Token verification failed");
-        }
-        return res.data.valid;
-    } catch (error) {
-        console.error("Token verification failed:", error);
-        return false;
+        console.error("Login request failed:", error);
+        throw new Error("Ath" + (error instanceof Error ? ": " + error.message : "SemDetalhes"));
     }
 }
