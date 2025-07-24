@@ -12,6 +12,11 @@ const ListAppointment = ({ role, email }: { role: string, email: string }) => {
     const [selectedDate, setSelectedDate] = useState<string>(new Date().toISOString().split('T')[0]);
 
     const handleCancelAppointment = async (hour: string, date: string, email_barber: string, email_client: string) => {
+        const appointmentHour = typeof hour === 'string' ? parseInt(hour, 10) : hour;
+        if (appointmentHour - new Date().getHours() < 2 && role !== "admin") {
+            alert("Cancelamento só permitido com 2 horas de antecedência");
+            return;
+        }
         alert("Canceling appointment...");
         try {
             const response = await cancelAppointment(date, hour, email_barber, email_client);
@@ -40,7 +45,8 @@ const ListAppointment = ({ role, email }: { role: string, email: string }) => {
                     setAppointments(response as AppointmentData[]); return;
                 } else if (isClient) {
                     response.forEach((appointment) => {
-                        const appointmentDate = new Date(appointment.date);
+                        const [year, month, day] = appointment.date.split('-');
+                        const appointmentDate = new Date(Number(year), Number(month) - 1, Number(day));
                         appointmentDate.setHours(0, 0, 0, 0);
 
                         if (appointmentDate >= today) {

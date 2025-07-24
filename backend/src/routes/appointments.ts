@@ -79,6 +79,10 @@ router.post('/cancel', authenticateToken, async (req: AuthRequest, res) => {
       return res.status(400).json({ success: false, message: 'Campos obrigatórios ausentes' });
     }
 
+    const appointmentHour = typeof hour === 'string' ? parseInt(hour, 10) : hour;
+    if (appointmentHour - new Date().getHours() < 2 && userRole !== 'admin') {
+      return res.status(400).json({ success: false, message: 'Cancelamento só permitido com 2 horas de antecedência' });
+    }
     const appointmentDate = new Date(`${date}T${hour}:00.000Z`);
     const barber = await prisma.users.findUnique({ where: { email_user: email_barber, type_user: 'barber' } });
     if (!barber) {
