@@ -10,37 +10,23 @@ export async function GET(request: NextRequest) {
         }
 
         const { searchParams } = new URL(request.url);
-        const role = searchParams.get("role");
         const date = searchParams.get("date");
-        const user = searchParams.get("user");
+        const email_user = searchParams.get("email_user");
 
-        if (!role) {
+        if (!email_user) {
             return NextResponse.json({
-                error: "Role is required"
+                error: "Email user is required"
             }, { status: 400 });
         }
 
-        
         const baseUrl = process.env.NEXT_PUBLIC_API_BASE_URL || '';
         const params = new URLSearchParams();
-        
         const queryDate = date || new Date().toLocaleDateString('pt-BR');
         params.append('date', queryDate);
+        params.append('user_id', email_user ?? '');
 
-        let userType = role;
-        if (role === 'client') userType = 'client';
-        else if (role === 'barber') userType = 'barber';
-        else if (role === 'admin') userType = 'admin';
-        
-        params.append('user_type', userType);
-        params.append('user_id', user ?? '');
+        const fullUrl = `${baseUrl}/appointments/list?${params.toString()}`;
 
-        if (role === 'client') {
-            params.append('myAppointment', 'true');
-        }
-        
-        const fullUrl = `${baseUrl}?${params.toString()}`;
-        
         const response = await axios.get(fullUrl, {
             headers: {
                 Authorization: `Bearer ${token}`,
@@ -53,7 +39,8 @@ export async function GET(request: NextRequest) {
         }
 
         return NextResponse.json({ 
-            error: "Failed to fetch appointments" 
+            error: "Failed to fetch appointments",
+            message: response.data
         }, { status: response.status });
 
     } catch (error: unknown) {

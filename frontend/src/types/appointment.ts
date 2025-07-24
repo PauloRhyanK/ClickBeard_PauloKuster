@@ -12,17 +12,17 @@ export interface HourResponse {
 export interface AppointmentData {
     date: string;
     hour: string;
-    barber: string;
-    speciality: string;
+    barber: BarberSlot;
+    speciality: string[];
     role?: string;
-    client?: string;
+    client?: BarberSlot;
 }
 
 export interface BarberSlot {
     name: string;
     email: string;
-    specialities: string[];
-    appointments: AppointmentData[];
+    specialities?: string[];
+    appointments?: AppointmentData[];
 }
 
 export interface NewAppointmentResponse {

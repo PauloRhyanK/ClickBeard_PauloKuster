@@ -80,7 +80,7 @@ export async function fetchNewAppointment(data: CreateAppointmentRequest): Promi
     }
 }
 
-export async function fetchAppointments(role: string): Promise<AppointmentData[]> {
+export async function fetchAppointments(date: string, email: string): Promise<AppointmentData[]> {
     const token = localStorage.getItem("token");
     const user = localStorage.getItem("user");
     if (!token) {
@@ -88,24 +88,15 @@ export async function fetchAppointments(role: string): Promise<AppointmentData[]
     }
 
     try {
-        const response = await axios.get(`/api/appointments?role=${role}&user=${user}`, {
+        const response = await axios.get(`/api/appointments?date=${date}&email_user=${email}`, {
             headers: {
                 Authorization: `Bearer ${token}`
             }
         });
-        // if(role==='barber' || role==='admin') {
-        //     return response.data.barbers?.flatMap((barber: BarberSlot) =>
-        //         barber.hours.map(hour => ({
-        //             ...hour,
-        //             date: hour.date,
-        //             barber: barber.name,
-        //             hour: hour.hour,
-        //             speciality: hour.speciality,
-        //             client: hour.client
-        //         }))
-        //     ) ?? [] as AppointmentData[];
-        // }
-        return response.data as AppointmentData[];
+        if(response.data.success !== true) {
+            throw new Error("Alerta:" + (response.data || ""));
+        }
+        return response.data.appointments as AppointmentData[];
     } catch (error) {
         console.error("Error fetching appointments:", error);
         throw new Error("Failed to fetch appointments");

@@ -1,8 +1,8 @@
 import { fetchAppointments } from "@/lib/appoitmentService";
-import { AppointmentData, NewAppointmentResponse } from "@/types";
+import { AppointmentData } from "@/types";
 import { useEffect, useState } from "react";
 
-const ListAppointment = ({ role }: { role: string }) => {
+const ListAppointment = ({ role, email }: { role: string, email: string }) => {
     const isClient = role === "client";
     const isBarber = role === "barber";
     const isAdmin = role === "admin";
@@ -10,11 +10,12 @@ const ListAppointment = ({ role }: { role: string }) => {
     const [appointments, setAppointments] = useState<AppointmentData[]>([]);
     const [historical, setHistorical] = useState<AppointmentData[]>([]);
     const [selectedDate, setSelectedDate] = useState<string>(new Date().toISOString().split('T')[0]);
+    
 
     useEffect(() => {
         const fetchData = async () => {
             try {
-                const response = await fetchAppointments(role);
+                const response = await fetchAppointments(selectedDate, email);
                 const today = new Date();
                 today.setHours(0, 0, 0, 0);
                 const futureAppointments: AppointmentData[] = [];
@@ -41,7 +42,7 @@ const ListAppointment = ({ role }: { role: string }) => {
             }
         };
         fetchData();
-    }, [role]);
+    }, [role, selectedDate]);
 
     const formatDate = (dateString: string) => {
         const date = new Date(dateString);
@@ -66,7 +67,7 @@ const ListAppointment = ({ role }: { role: string }) => {
                     </div>
                     <ul>
                         {appointments.length > 0 ? (
-                            appointments.map((appointment, index) => (
+                            appointments.map((appointment: AppointmentData, index) => (
                                 <li key={index} className="itemAppointmentClient flex flex-col mb-5">
                                     <div className="itemHeader flex justify-between items-center p-md p-5">
                                         <strong>{formatDate(appointment.date)}</strong>
@@ -74,8 +75,8 @@ const ListAppointment = ({ role }: { role: string }) => {
                                     </div>
                                     <div className="itemData p-md pt-10 pb-10 pl-7 pr-7">
                                         <strong>{appointment.hour}</strong>
-                                        <span className="">{appointment.barber}</span>
-                                        <span>{appointment.speciality}</span>
+                                        <span className="">{appointment.barber.name}</span>
+                                        <span>{appointment.speciality.join(", ")}</span>
                                         <strong className="flex justify-end">X</strong>
                                     </div>
                                 </li>
@@ -103,7 +104,7 @@ const ListAppointment = ({ role }: { role: string }) => {
                                     </div>
                                     <div className="itemData p-md pt-10 pb-10 pl-7 pr-7">
                                         <strong>{appointment.hour}</strong>
-                                        <span className="">{appointment.barber}</span>
+                                        <span className="">{appointment.barber.name}</span>
                                         <span>{appointment.speciality}</span>
                                     </div>
                                 </li>
@@ -172,11 +173,11 @@ const ListAppointment = ({ role }: { role: string }) => {
                                 {groupedAppointments.morning.map((appointment, index) => (
                                     <div key={index} className="itemData p-md pt-10 pl-7 pr-7">
                                         <strong>{appointment.hour}</strong>
-                                        <span className="">{appointment.client || "Cliente"}</span>
+                                        <span className="">{appointment.client?.name || "Cliente"}</span>
                                         <span>{appointment.speciality}</span>
                                         {role === "admin" && (
                                             <>
-                                                <span>{appointment.barber}</span>
+                                                <span>{appointment.barber.name}</span>
                                                 <strong className="close flex justify-end">X</strong>
                                             </>
                                         )}
@@ -197,11 +198,11 @@ const ListAppointment = ({ role }: { role: string }) => {
                                 {groupedAppointments.afternoon.map((appointment, index) => (
                                     <div key={index} className="itemData p-md pt-10 pl-7 pr-7">
                                         <strong>{appointment.hour}</strong>
-                                        <span className="">{appointment.client || "Cliente"}</span>
-                                        <span>{appointment.speciality}</span>
+                                        <span className="">{appointment.client?.name || "Cliente"}</span>
+                                        <span>{appointment.speciality.join(", ")}</span>
                                         {role === "admin" && (
                                             <>
-                                                <span>{appointment.barber}</span>
+                                                <span>{appointment.barber.name}</span>
                                                 <strong className="close flex justify-end">X</strong>
                                             </>
                                         )}
@@ -222,11 +223,11 @@ const ListAppointment = ({ role }: { role: string }) => {
                                 {groupedAppointments.night.map((appointment, index) => (
                                     <div key={index} className="itemData p-md pt-10 pl-7 pr-7">
                                         <strong>{appointment.hour}</strong>
-                                        <span className="">{appointment.client || "Cliente"}</span>
-                                        <span>{appointment.speciality}</span>
+                                        <span className="">{appointment.client?.name || "Cliente"}</span>
+                                        <span>{appointment.speciality.join(", ")}</span>
                                         {role === "admin" && (
                                             <>
-                                                <span>{appointment.barber}</span>
+                                                <span>{appointment.barber.name}</span>
                                                 <strong className="close flex justify-end">X</strong>
                                             </>
                                         )}
