@@ -231,6 +231,7 @@ const NewAppointment: React.FC<NewAppointmentProps> = ({ role }) => {
                         name="barber" 
                         id="barber"
                         value={selectedBarber}
+                        data-email="barber"
                     >
                         <option value="">Todos os barbeiros</option>
                         {barbers.map((barber, index) => (
@@ -253,7 +254,11 @@ const NewAppointment: React.FC<NewAppointmentProps> = ({ role }) => {
                         >
                             <option value="">Selecione um cliente...</option>
                             {clients.map((clientItem, key) => (
-                                <option key={key} value={clientItem.id_user}>
+                                <option
+                                    key={key}
+                                    value={clientItem.id_user}
+                                    data-email={clientItem.email_user}
+                                >
                                     {clientItem.name_user}
                                 </option>
                             ))}
