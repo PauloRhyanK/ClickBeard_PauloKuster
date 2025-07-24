@@ -1,4 +1,4 @@
-import { fetchAppointments } from "@/lib/appoitmentService";
+import { fetchAppointments, cancelAppointment } from "@/lib/appoitmentService";
 import { AppointmentData } from "@/types";
 import { useEffect, useState } from "react";
 
@@ -10,7 +10,20 @@ const ListAppointment = ({ role, email }: { role: string, email: string }) => {
     const [appointments, setAppointments] = useState<AppointmentData[]>([]);
     const [historical, setHistorical] = useState<AppointmentData[]>([]);
     const [selectedDate, setSelectedDate] = useState<string>(new Date().toISOString().split('T')[0]);
-    
+
+    const handleCancelAppointment = async (hour: string, date: string, email_barber: string, email_client: string) => {
+        try {
+            const response = await cancelAppointment(date, hour, email_barber, email_client);
+            if (response.success !== true){
+                console.error("Error canceling appointment");
+            }else {
+                setAppointments(prev => prev.filter(app => app.hour !== hour || app.date !== date || app.barber.email !== email_barber));
+                console.log("Appointment canceled successfully");   
+            }
+        } catch (error) {
+            console.error("Error canceling appointment:", error);
+        }
+    };
 
     useEffect(() => {
         const fetchData = async () => {
@@ -77,7 +90,7 @@ const ListAppointment = ({ role, email }: { role: string, email: string }) => {
                                         <strong>{appointment.hour}</strong>
                                         <span className="">{appointment.barber.name}</span>
                                         <span>{appointment.speciality.join(", ")}</span>
-                                        <strong className="flex justify-end">X</strong>
+                                        <strong onClick={() => handleCancelAppointment(appointment.hour, appointment.date, appointment.barber.email, email)} className="flex justify-end cursor-pointer">X</strong>
                                     </div>
                                 </li>
                             ))

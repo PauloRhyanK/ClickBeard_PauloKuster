@@ -102,3 +102,28 @@ export async function fetchAppointments(date: string, email: string): Promise<Ap
         throw new Error("Failed to fetch appointments");
     }
 }
+
+export async function cancelAppointment(date: string, hour: string, email_barber: string, email_client: string): Promise<{ success: boolean }> {
+    const token = localStorage.getItem("token");
+    if (!token) {
+        throw new Error("Token is required");
+    }
+
+    try {
+        const response = await axios.post('/api/appointments/cancel', {
+            date,
+            hour,
+            email_barber,
+            email_client
+        }, {
+            headers: {
+                Authorization: `Bearer ${token}`,
+                'Content-Type': 'application/json'
+            }
+        });
+        return response.data.success;
+    } catch (error) {
+        console.error("Error canceling appointment:", error);
+        throw new Error("Failed to cancel appointment");
+    }
+}
