@@ -10,9 +10,9 @@ export async function POST(request: NextRequest) {
         }
 
         const body = await request.json();
-        const { date, hour, barber, speciality, role } = body;
+        const { date, hour, email_barber, email_client, speciality } = body;
 
-        if (!date || !hour || !barber || !role) {
+        if (!date || !hour || !email_barber || !email_client || !speciality) {
             return NextResponse.json({ 
                 error: "Missing required fields" 
             }, { status: 400 });
@@ -27,9 +27,9 @@ export async function POST(request: NextRequest) {
         const appointmentData = {
             date: formattedDate,
             hour,
-            barber,
+            email_barber,
+            email_client,
             speciality: speciality || "",
-            user_type: role,
         };
 
         const baseUrl = process.env.NEXT_PUBLIC_API_BASE_URL || '';

@@ -1,6 +1,6 @@
 import { fetchAvailableHours, fetchNewAppointment } from "@/lib/appoitmentService";
 import { BarberSlot, HourSlot, ClientsResponse, HourResponse } from "@/types";
-import { fetchClients,  } from "@/lib/clientService";
+import { fetchClients, } from "@/lib/clientService";
 import React, { useState, useEffect } from "react";
 import HoursApointment from "./HoursApointment";
 
@@ -9,7 +9,7 @@ interface NewAppointmentProps {
 }
 
 const NewAppointment: React.FC<NewAppointmentProps> = ({ role }) => {
-    const userRole = role;  
+    const userRole = role;
     const [hours, setHours] = useState<HourSlot[]>([]);
     const [barbers, setBarbers] = useState<BarberSlot[]>([]);
     const [allBarbers, setAllBarbers] = useState<BarberSlot[]>([]);
@@ -19,8 +19,10 @@ const NewAppointment: React.FC<NewAppointmentProps> = ({ role }) => {
 
     const [speciality, setSpeciality] = useState<string>("");
     const [selectedBarber, setSelectedBarber] = useState<string>("");
+    const [barberEmail, setBarberEmail] = useState<string>("");
     const [hoursSelected, setHoursSelected] = useState<string>("");
     const [client, setClient] = useState<string>("");
+    const [clientEmail, setClientEmail] = useState<string>("");
 
     const token = localStorage.getItem("token");
     const user = localStorage.getItem("user");
@@ -29,6 +31,8 @@ const NewAppointment: React.FC<NewAppointmentProps> = ({ role }) => {
     useEffect(() => {
         if (role === "barber") {
             setSelectedBarber(user || "");
+        } else if (role === "client") {
+            setClientEmail(user || "");
         }
     }, [role, user]);
 
@@ -44,10 +48,9 @@ const NewAppointment: React.FC<NewAppointmentProps> = ({ role }) => {
                 }
             }
         };
-        console.log("Clientes3:", clients);
         fetchData();
     }, [token, userRole, isReady]);
-    
+
     const getAllSpecialities = (barbersList: BarberSlot[]): string[] => {
         const allSpecs = new Set<string>();
         barbersList.map(barber => {
@@ -69,7 +72,7 @@ const NewAppointment: React.FC<NewAppointmentProps> = ({ role }) => {
             const barber = allBarbers.find(b => b.name === selectedBarber);
             if (barber) {
                 setSpecialities(barber.specialities || []);
-                setBarbers([barber]); 
+                setBarbers([barber]);
                 return;
             }
         }
@@ -80,7 +83,7 @@ const NewAppointment: React.FC<NewAppointmentProps> = ({ role }) => {
             );
         }
         if (hoursSelected) {
-            filteredBarbers = filteredBarbers.filter(barber => 
+            filteredBarbers = filteredBarbers.filter(barber =>
                 isBarberAvailable(barber, hoursSelected)
             );
         }
@@ -92,7 +95,7 @@ const NewAppointment: React.FC<NewAppointmentProps> = ({ role }) => {
     useEffect(() => {
         const fetchData = async () => {
             try {
-                const availableHours = await fetchAvailableHours({ 
+                const availableHours = await fetchAvailableHours({
                     date: date.toISOString().split('T')[0],
                     token: token || "",
                     user: user || "",
@@ -103,12 +106,12 @@ const NewAppointment: React.FC<NewAppointmentProps> = ({ role }) => {
                     name: barber.name,
                     email: barber.email,
                     specialities: barber.specialities || [],
-                    appointments: barber.appointments || [] 
+                    appointments: barber.appointments || []
                 }));
                 setHours(allHours);
                 setAllBarbers(allBarbersData);
                 setBarbers(allBarbersData);
-                
+
                 const allSpecs = getAllSpecialities(allBarbersData);
                 setSpecialities(allSpecs);
 
@@ -116,7 +119,7 @@ const NewAppointment: React.FC<NewAppointmentProps> = ({ role }) => {
                 console.error("Erro ao buscar dados:", error);
             }
         };
-        
+
         fetchData();
     }, [date, userRole, token, user]);
 
@@ -129,12 +132,12 @@ const NewAppointment: React.FC<NewAppointmentProps> = ({ role }) => {
 
     const handleSubmit = async (e: React.FormEvent) => {
         e.preventDefault();
-        
+
         if (!hoursSelected) {
             alert("Selecione um horário");
             return;
         }
-        
+
         if (!selectedBarber) {
             alert("Selecione um barbeiro");
             return;
@@ -152,22 +155,22 @@ const NewAppointment: React.FC<NewAppointmentProps> = ({ role }) => {
         const appointmentData = {
             date: date.toISOString().split('T')[0],
             hour: hoursSelected,
-            barber: selectedBarber,
+            email_barber: barberEmail,
+            email_client: clientEmail,
             speciality: speciality,
-            role: userRole,
             ...(client && { client })
         };
 
         try {
             const resp = await fetchNewAppointment(appointmentData);
-            
-            if (resp.success) {
+            if(resp.success === true) {
                 alert("Agendamento criado com sucesso!");
                 resetFilters();
-                setClient(""); 
-            } else {
+                setClient("");
+            }else {
                 alert(resp.message || "Erro ao criar agendamento");
             }
+
         } catch (error: unknown) {
             alert("Erro ao criar agendamento");
         }
@@ -183,31 +186,31 @@ const NewAppointment: React.FC<NewAppointmentProps> = ({ role }) => {
             <form onSubmit={handleSubmit} className="flex flex-col gap-5 w-full max-w-md mt-6">
                 <div className="flex flex-col gap-2 w-full">
                     <label htmlFor="appointmentDate" className="label">Data</label>
-                    <input 
-                        onChange={(e) => setDate(new Date(e.target.value))} 
-                        className="w-full" 
-                        type="date" 
-                        id="appointmentDate" 
+                    <input
+                        onChange={(e) => setDate(new Date(e.target.value))}
+                        className="w-full"
+                        type="date"
+                        id="appointmentDate"
                         name="appointmentDate"
                         min={new Date().toISOString().split('T')[0]}
                         value={date.toISOString().split('T')[0]}
-                        required 
+                        required
                     />
                 </div>
 
                 <div className="flex flex-col gap-2">
-                    <HoursApointment 
-                        hours={hours} 
-                        setHour={setHoursSelected} 
-                        selectedHour={hoursSelected} 
+                    <HoursApointment
+                        hours={hours}
+                        setHour={setHoursSelected}
+                        selectedHour={hoursSelected}
                     />
                 </div>
 
                 <div className="flex flex-col gap-2">
                     <label htmlFor="specialities">Selecione a especialidade</label>
-                    <select 
-                        onChange={(e) => setSpeciality(e.target.value)} 
-                        name="specialities" 
+                    <select
+                        onChange={(e) => setSpeciality(e.target.value)}
+                        name="specialities"
                         id="specialities"
                         value={speciality}
                     >
@@ -219,34 +222,41 @@ const NewAppointment: React.FC<NewAppointmentProps> = ({ role }) => {
                         ))}
                     </select>
                 </div>
-                
+
                 {(userRole === "admin" || userRole === "client") && (
-                <div className="flex flex-col gap-2">
-                    <label htmlFor="barber">Selecione o barbeiro</label>
-                    <select 
-                        onChange={(e) => setSelectedBarber(e.target.value)} 
-                        name="barber" 
-                        id="barber"
-                        value={selectedBarber}
-                        data-email="barber"
-                    >
-                        <option value="">Todos os barbeiros</option>
-                        {barbers.map((barber, index) => (
-                            <option key={index} value={barber.name}>
-                                {barber.name}
-                            </option>
-                        ))}
-                    </select>
-                </div>)}
+                    <div className="flex flex-col gap-2">
+                        <label htmlFor="barber">Selecione o barbeiro</label>
+                        <select
+                            onChange={(e) => { 
+                                const target = e.target as HTMLSelectElement;
+                                setSelectedBarber(target.value);
+                                setBarberEmail(target.selectedOptions[0].dataset.email || "");
+                            }}
+                            name="barber"
+                            id="barber"
+                            value={selectedBarber}
+                        >
+                            <option value="">Todos os barbeiros</option>
+                            {barbers.map((barber, index) => (
+                                <option key={index} value={barber.name} data-email={barber.email}>
+                                    {barber.name}
+                                </option>
+                            ))}
+                        </select>
+                    </div>)}
 
                 {(userRole === "admin" || userRole === "barber") && (
                     <div className="flex flex-col gap-2">
                         <label htmlFor="client">Selecione o cliente</label>
-                        <select 
-                            name="client" 
+                        <select
+                            name="client"
                             id="client"
                             value={client}
-                            onChange={(e) => setClient(e.target.value)}
+                            onChange={(e) => {
+                                const target = e.target as HTMLSelectElement;
+                                setClient(target.value);
+                                setClientEmail(target.selectedOptions[0].dataset.email || "");
+                            }}
                             required={userRole === "admin" || userRole === "barber"}
                         >
                             <option value="">Selecione um cliente...</option>
@@ -264,15 +274,15 @@ const NewAppointment: React.FC<NewAppointmentProps> = ({ role }) => {
                 )}
 
                 <div className="flex gap-2">
-                    <button 
-                        type="button" 
-                        onClick={resetFilters} 
+                    <button
+                        type="button"
+                        onClick={resetFilters}
                         className="btn-secondary flex-1 border"
                     >
                         Limpar
                     </button>
-                    <button 
-                        type="submit" 
+                    <button
+                        type="submit"
                         className="btn-submit flex-1"
                         disabled={!hoursSelected || !selectedBarber}
                     >

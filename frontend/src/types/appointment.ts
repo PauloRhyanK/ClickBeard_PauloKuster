@@ -39,8 +39,7 @@ export interface CreateAppointmentData {
 export interface CreateAppointmentRequest {
     date: string;
     hour: string;
-    barber: string;
+    email_barber: string;
+    email_client: string;
     speciality: string;
-    role: string;
-    client?: string;
 }

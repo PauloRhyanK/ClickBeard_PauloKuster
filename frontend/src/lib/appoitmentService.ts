@@ -48,8 +48,11 @@ export async function fetchNewAppointment(data: CreateAppointmentRequest): Promi
     if (!data.hour) {
         throw new Error("Hour is required");
     }
-    if (!data.barber) {
+    if (!data.email_barber) {
         throw new Error("Barber is required");
+    }
+    if (!data.email_client) {
+        throw new Error("Client is required");
     }
     if (!data.speciality) {
         throw new Error("Speciality is required");
@@ -62,8 +65,6 @@ export async function fetchNewAppointment(data: CreateAppointmentRequest): Promi
 
     const appointmentData = {
         ...data,
-        userId: localStorage.getItem("user"),
-        date: new Date(data.date).toISOString().split('T')[0]
     };
 
     try {
