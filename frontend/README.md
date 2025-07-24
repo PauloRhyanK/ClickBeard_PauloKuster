@@ -1,36 +1,181 @@
-This is a [Next.js](https://nextjs.org) project bootstrapped with [`create-next-app`](https://nextjs.org/docs/app/api-reference/cli/create-next-app).
+## Clickbeadr Frontend
 
-## Getting Started
+## Como Executar
 
-First, run the development server:
-
+Na pasta `frontend`:
 ```bash
+# Instalar dependências
+npm install
+
+# Executar em modo desenvolvimento
 npm run dev
-# or
-yarn dev
-# or
-pnpm dev
-# or
-bun dev
+
+# Executar com Turbopack (mais rápido)
+npm run devt
+
+# Build para produção
+npm run build
+
+# Executar em produção
+npm start
 ```
 
-Open [http://localhost:3000](http://localhost:3000) with your browser to see the result.
+### Estrutura Principal
+O frontend foi dividido em **três telas principais**:
 
-You can start editing the page by modifying `app/page.tsx`. The page auto-updates as you edit the file.
+- **Login** - Autenticação de usuários
+- **Registro** - Cadastro de novos usuários  
+- **Dashboard** - Painel principal com *(Novo Agendamento / Listagem de agendamentos)*
 
-This project uses [`next/font`](https://nextjs.org/docs/app/building-your-application/optimizing/fonts) to automatically optimize and load [Geist](https://vercel.com/font), a new font family for Vercel.
+### Tipos de Usuário
 
-## Learn More
+#### Cliente
+-  Pode agendar seu atendimento, escolhendo **barbeiro, especialidade e horário**
+-  Pode cancelar seu atendimento
+-  Pode ver seus próximos agendamentos
+-  Pode ver seu histórico de agendamentos
 
-To learn more about Next.js, take a look at the following resources:
+#### Barbeiro
+-  Pode agendar novos atendimentos para clientes
+-  **Não pode cancelar agendamentos** (precisa falar com o administrador)
+-  Pode visualizar os seus agendamentos para o dia selecionado
 
-- [Next.js Documentation](https://nextjs.org/docs) - learn about Next.js features and API.
-- [Learn Next.js](https://nextjs.org/learn) - an interactive Next.js tutorial.
+####  Admin
+-  Pode agendar novos atendimentos para clientes e barbeiros
+-  Pode cancelar agendamentos
+-  Pode **visualizar todos os atendimentos** do dia selecionado, com todos os dados (cliente, barbeiro e tipo de serviço)
 
-You can check out [the Next.js GitHub repository](https://github.com/vercel/next.js) - your feedback and contributions are welcome!
+##  Estrutura de Pastas
 
-## Deploy on Vercel
+### Pasta `app/`
+```
+app/
+├── api/              # Regras de negócio de cada requisição (API Routes)
+│   ├── login/        # Endpoint de autenticação
+│   ├── register/     # Endpoint de registro
+│   ├── token/        # Validação de token
+│   ├── clients/      # Listagem de clientes
+│   ├── hours/        # Horários disponíveis
+│   ├── appointment/  # Criar agendamento
+│   └── appointments/ # Listar agendamentos
+├── login/           # Página de login
+├── register/        # Página de registro
+├── dashboard/       # Dashboard principal
+├── layout.tsx       # Layout raiz da aplicação
+├── page.tsx         # Página inicial
+└── globals.css      # Estilos globais
+```
 
-The easiest way to deploy your Next.js app is to use the [Vercel Platform](https://vercel.com/new?utm_medium=default-template&filter=next.js&utm_source=create-next-app&utm_campaign=create-next-app-readme) from the creators of Next.js.
+###  Pasta `components/`
+- **[`ListAppointment`](frontend/src/components/ListAppointment.tsx)** - Componente da lista de atendimentos e histórico para todos os tipos de usuário
+- **[`NewAppointment`](frontend/src/components/NewAppointment.tsx)** - Componente de criar novo agendamento
+- **[`HoursAppointment`](frontend/src/components/HoursApointment.tsx)** - Componente da listagem de horários para um novo agendamento
 
-Check out our [Next.js deployment documentation](https://nextjs.org/docs/app/building-your-application/deploying) for more details.
+### Pasta `lib/` *(Separação da lógica de negócio)*
+- **[`appointmentService`](frontend/src/lib/appoitmentService.ts)** - Lógica para requisições de dados sobre agendamentos
+- **[`auth`](frontend/src/lib/auth.ts)** - Lógica de requisição para autenticação
+- **[`clientService`](frontend/src/lib/clientService.ts)** - Lógica de requisição para dados e listagem de clientes
+
+##  Fluxos Principais
+
+###  **Fluxo de Login**
+1. **Página de Login** ([`/login`](frontend/src/app/login/page.tsx)):
+   - Recebe email e senha do usuário
+   - Valida formato do email e tamanho mínimo da senha
+   - Chama função [`loginUser`](frontend/src/lib/auth.ts) para autenticação
+
+2. **Autenticação** ([`auth.ts`](frontend/src/lib/auth.ts)):
+   - Faz validação dos dados de entrada
+   - Envia requisição para `/api/login`
+   - Armazena token, tipo de usuário e ID no localStorage
+   - Redireciona para o dashboard em caso de sucesso
+
+### **Fluxo de Registro**
+1. **Página de Registro** ([`/register`](frontend/src/app/register/page.tsx)):
+   - Formulário com nome, email, senha, tipo de usuário
+   - Seleção de data de nascimento
+   - Para barbeiros: seleção múltipla de especialidades
+   - Validação de campos obrigatórios
+
+2. **Processamento**:
+   - Envia dados para `/api/register`
+   - Retorna feedback de sucesso ou erro
+
+### **Fluxo do Dashboard**
+1. **Verificação de Autenticação**:
+   - Verifica token, usuário e role no localStorage
+   - Valida token com [`verifyToken`](frontend/src/lib/auth.ts)
+   - Redireciona para login se inválido
+
+2. **Renderização Condicional**:
+   - Carrega componentes [`NewAppointment`](frontend/src/components/NewAppointment.tsx) e [`ListAppointment`](frontend/src/components/ListAppointment.tsx)
+   - Interface adapta-se conforme o tipo de usuário
+
+### **Fluxo de Agendamento**
+1. **Seleção de Data**:
+   - Usuário seleciona data (mínimo: data atual)
+   - Sistema busca horários disponíveis via [`fetchAvailableHours`](frontend/src/lib/appoitmentService.ts)
+
+2. **Filtros Dinâmicos**:
+   - **Especialidades**: Filtra barbeiros por especialidade
+   - **Barbeiros**: Mostra apenas barbeiros disponíveis
+   - **Horários**: Exibe apenas horários livres
+
+3. **Criação do Agendamento**:
+   - Validação de campos obrigatórios
+   - Para admin/barbeiro: obrigatório selecionar cliente
+   - Envio via [`fetchNewAppointment`](frontend/src/lib/appoitmentService.ts)
+
+### **Fluxo de Listagem**
+1. **Busca de Dados**:
+   - [`fetchAppointments`](frontend/src/lib/appoitmentService.ts) busca agendamentos por role
+   - Separação entre agendamentos futuros e histórico
+
+2. **Exibição por Tipo de Usuário**:
+   - **Cliente**: Próximos agendamentos + histórico
+   - **Barbeiro/Admin**: Agendamentos agrupados por período (manhã, tarde, noite)
+
+## Tecnologias Utilizadas
+
+- **Next.js 15** - Framework React com App Router
+- **TypeScript** - Tipagem estática
+- **Tailwind CSS** - Estilização utilitária
+- **Axios** - Cliente HTTP
+- **React Hooks** - Gerenciamento de estado
+
+## Arquitetura do Backend
+
+```txt
+clickbeard-backend/
+├─ src/
+│  ├─ controllers/
+│  ├─ middlewares/
+│  ├─ routes/
+│  ├─ services/
+│  ├─ prisma/
+│  ├─ utils/
+│  ├─ types/
+│  ├─ app.ts
+│  └─ server.ts
+├─ prisma/
+│  └─ schema.prisma
+├─ docker-compose.yml
+├─ Dockerfile
+├─ .env
+├─ tsconfig.json
+├─ nodemon.json
+├─ package.json
+```
+
+
+
+## Funcionalidades
+
+-  Autenticação JWT
+-  Cadastro de usuários (Cliente/Barbeiro)
+-  Agendamento de horários
+-  Filtros dinâmicos de barbeiros e especialidades
+-  Histórico de agendamentos
+-  Interface responsiva
+-  Validação de formulários
+-  Gerenciamento de estado local

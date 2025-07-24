@@ -1,5 +1,20 @@
 # ClickBeard Backend
+## Como executar
+Na pasta backend
+```bash
+# Instalar dependências
+npm install
 
+# Executar em modo desenvolvimento
+npm run docker
+
+# Build para produção
+npm run build
+### Testes
+
+npm test            # Executa os testes
+npm run test:watch  # Executa os testes em modo watch
+```
 ## Fluxo de Login de Usuário
 
 O fluxo de login de usuário segue as etapas abaixo:
