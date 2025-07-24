@@ -514,7 +514,6 @@ curl -H "Authorization: Bearer <jwt_token>" "http://localhost:3000/appointments/
   "pass_user": "senha123",
   "type_user": "client" // ou "barber"
   // "age_user": 25, // opcional
-  // "hiring_date": "2025-07-22T00:00:00.000Z" // opcional
 }
 ```
 
