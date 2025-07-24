@@ -95,7 +95,7 @@ export async function fetchAppointments(date: string, email: string): Promise<Ap
             }
         });
         if(response.data.success !== true) {
-            throw new Error("Alerta:" + (response.data || ""));
+            throw new Error("Alerta:" + response.data.message || "");
         }
         return response.data.appointments as AppointmentData[];
     } catch (error) {

@@ -59,7 +59,7 @@ const ListAppointment = ({ role, email }: { role: string, email: string }) => {
                     setHistorical(pastAppointments);
                 }
             } catch (error) {
-                console.error("Error fetching appointments:", error);
+                console.log("Error fetching appointments:", error);
             }
         };
         fetchData();

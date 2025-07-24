@@ -18,7 +18,7 @@ const NewAppointment: React.FC<NewAppointmentProps> = ({ role }) => {
     const [clients, setClients] = useState<ClientsResponse[]>([]);
 
     const [speciality, setSpeciality] = useState<string>("");
-    const [selectedBarber, setSelectedBarber] = useState<string>("");
+    const [selectedBarber, setSelectedBarber] = useState<string>(role === "barber" ? localStorage.getItem("user") || "" : "");
     const [barberEmail, setBarberEmail] = useState<string>("");
     const [hoursSelected, setHoursSelected] = useState<string>("");
     const [client, setClient] = useState<string>("");
@@ -29,12 +29,15 @@ const NewAppointment: React.FC<NewAppointmentProps> = ({ role }) => {
 
     const [isReady, setIsReady] = useState(false);
     useEffect(() => {
-        if (role === "barber") {
-            setSelectedBarber(user || "");
-        } else if (role === "client") {
-            setClientEmail(user || "");
+        const updateEmail = (email: string) => {
+            if(role === "barber"){
+                setBarberEmail(email);
+            }else if(role === "client"){
+                setClientEmail(email);
+            }
         }
-    }, [role, user]);
+        updateEmail(user || "");
+    }, [role, user, isReady]);
 
     useEffect(() => {
         const fetchData = async () => {
@@ -125,7 +128,9 @@ const NewAppointment: React.FC<NewAppointmentProps> = ({ role }) => {
 
     const resetFilters = () => {
         setSpeciality("");
-        setSelectedBarber("");
+        if(userRole !== "barber") {
+            setSelectedBarber("");
+        }
         setHoursSelected("");
     };
 
@@ -285,7 +290,10 @@ const NewAppointment: React.FC<NewAppointmentProps> = ({ role }) => {
                     <button
                         type="submit"
                         className="btn-submit flex-1"
-                        disabled={!hoursSelected || !selectedBarber}
+                        disabled={
+                          !hoursSelected ||
+                          ((userRole === "admin" || userRole === "client") && !selectedBarber)
+                        }
                     >
                         Agendar
                     </button>
