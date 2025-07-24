@@ -16,6 +16,7 @@ O ClickBeard é um sistema completo de agendamento para barbearias, desenvolvido
 
 # Como Executar
 
+
 Na pasta frontend
 ```bash
 # Instalar dependências
@@ -33,6 +34,16 @@ npm run build
 # Executar em produção
 npm start
 ```
+#### Configuração do .env (Frontend)
+
+O arquivo `.env.local` na pasta `Frontend` com a variável de ambiente abaixo:
+- `NEXT_PUBLIC_API_BASE_URL`: Endereço que está rodando o backend.
+
+```env
+NEXT_PUBLIC_API_BASE_URL=https://endereço.backend:PORTA
+```
+
+
 
 Na pasta backend
 ```bash
@@ -50,6 +61,19 @@ npm run build
 npm test            # Executa os testes
 npm run test:watch  # Executa os testes em modo watch
 ```
+#### Configuração do .env (Backend)
+
+Para que o backend funcione corretamente, é necessário criar um arquivo `.env` na pasta `backend` com as variáveis de ambiente abaixo:
+
+```env
+DATABASE_URL=postgresql://usuario:senha@host:porta/dbname
+JWT_SECRET=sua_chave_secreta
+PORT=3000
+```
+
+- `DATABASE_URL`: String de conexão do banco PostgreSQL (Neon). Você encontra essa URL no painel da Neon.
+- `JWT_SECRET`: Chave secreta usada para assinar e validar os tokens JWT.
+- `PORT`: Porta em que o backend irá rodar localmente (Se for usar)
 
 
 # Deploy em Produção
