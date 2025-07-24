@@ -46,6 +46,7 @@ NEXT_PUBLIC_API_BASE_URL=https://endereço.backend:PORTA
 
 
 Na pasta backend
+
 ```bash
 # Instalar dependências
 npm install
@@ -55,6 +56,7 @@ npm run docker
 
 # Build para produção
 npm run build
+```
 ### Testes
 
 ```bash
