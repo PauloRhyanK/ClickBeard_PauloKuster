@@ -61,7 +61,7 @@ export default function Register() {
             }
             const res = await axios.post("/api/register", payload)
             if (res.status >= 200 && res.status < 300) {
-                if(res.data.success == true) {
+                if(res.data.response.success == true) {
                     alert("Cadastro realizado com sucesso!");
                     setFormData({
                         name: '',
@@ -75,7 +75,6 @@ export default function Register() {
                     if(res.data.error) {
                         alert(res.data.error);
                     }
-                    alert("Erro ao cadastrar usuário, tente novamente mais tarde.");
                 }
             } else {
                 alert("Erro ao cadastrar usuário, tente novamente mais tarde.");
