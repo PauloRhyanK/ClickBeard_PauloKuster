@@ -13,7 +13,7 @@ export async function GET(request: NextRequest) {
         }
 
         const formattedDate = date ? new Date(date).toISOString().slice(0, 10) : "";
-        let baseUrl = `${process.env.NEXT_PUBLIC_API_BASE_URL || ''}/hours?date=${formattedDate}`;
+        const baseUrl = `${process.env.NEXT_PUBLIC_API_BASE_URL || ''}/hours?date=${formattedDate}`;
         const response = await axios.get(baseUrl, {
             headers: {
                 Authorization: `Bearer ${token}`
