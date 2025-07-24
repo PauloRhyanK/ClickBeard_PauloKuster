@@ -15,7 +15,11 @@ router.post('/', authenticateToken, async (req: AuthRequest, res) => {
     }
 
     const appointmentDate = new Date(`${date}T${hour}:00.000Z`);
-    if (appointmentDate < new Date()) {
+    const today = new Date();
+    today.setHours(0, 0, 0, 0);
+    const appointmentDay = new Date(appointmentDate);
+    appointmentDay.setHours(0, 0, 0, 0);
+    if (appointmentDay < today) {
       return res.status(400).json({ success: false, message: 'Data retroativa não permitida' });
     }
 
@@ -38,7 +42,7 @@ router.post('/', authenticateToken, async (req: AuthRequest, res) => {
     if (!hasSpec) {
       return res.status(400).json({ success: false, message: 'Barbeiro não possui essa especialidade' });
     }
-    
+
     const exists = await prisma.appointments.findFirst({
       where: {
         id_barber: barber.id_user,
@@ -50,7 +54,7 @@ router.post('/', authenticateToken, async (req: AuthRequest, res) => {
       return res.status(400).json({ success: false, message: 'Horário já ocupado para este barbeiro' });
     }
 
-    
+
     await prisma.appointments.create({
       data: {
         id_client: client.id_user,
@@ -80,30 +84,52 @@ router.post('/cancel', authenticateToken, async (req: AuthRequest, res) => {
     if (!barber) {
       return res.status(400).json({ success: false, message: 'Barbeiro não encontrado' });
     }
-    const client = await prisma.users.findUnique({ where: { email_user: email_client, type_user: 'client' } });
-    if (!client) {
-      return res.status(400).json({ success: false, message: 'Cliente não encontrado' });
-    }
-
-    const appointment = await prisma.appointments.findFirst({
-      where: {
-        id_barber: barber.id_user,
-        id_client: client.id_user,
-        appointment_time: appointmentDate,
-        canceled_at: null
+    let success = false;
+    let id_appointment;
+    let id_client;
+    if (userRole === 'admin') {
+      const appointment = await prisma.appointments.findFirst({
+        where: {
+          id_barber: barber.id_user,
+          appointment_time: appointmentDate,
+          canceled_at: null
+        }
+      });
+      if (appointment) {
+        success = true;
+        id_appointment = appointment.id_appointments;
+        id_client = appointment.id_client;
       }
-    });
-    if (!appointment) {
+    } else {
+      const client = await prisma.users.findUnique({ where: { email_user: email_client, type_user: 'client' } });
+      if (!client) {
+        return res.status(400).json({ success: false, message: 'Cliente não encontrado' });
+      }
+      const appointment = await prisma.appointments.findFirst({
+        where: {
+          id_barber: barber.id_user,
+          id_client: client.id_user,
+          appointment_time: appointmentDate,
+          canceled_at: null
+        }
+      });
+      if (appointment) {
+        success = true;
+        id_appointment = appointment.id_appointments;
+        id_client = appointment.id_client;
+      }
+    }
+    if (success === false) {
       return res.status(404).json({ success: false, message: 'Agendamento não encontrado ou já cancelado' });
     }
 
     // Só o cliente do appointment ou admin pode cancelar
-    if (!(userRole === 'admin' || (userRole === 'client' && userId && BigInt(userId) === appointment.id_client))) {
+    if (!(userRole === 'admin' || (userRole === 'client' && userId ))) {
       return res.status(403).json({ success: false, message: 'Apenas o cliente do agendamento ou admin pode cancelar' });
     }
 
     await prisma.appointments.update({
-      where: { id_appointments: appointment.id_appointments },
+      where: { id_appointments: id_appointment },
       data: { canceled_at: new Date() }
     });
     return res.status(200).json({ success: true });
@@ -122,13 +148,13 @@ router.get('/list', authenticateToken, async (req: AuthRequest, res) => {
   try {
     if (userRole === 'client') {
       if (userId === undefined) {
-        console.log('User ID not found in request');  
+        console.log('User ID not found in request');
         return res.status(400).json({ success: false, message: 'ID do usuário não encontrado' });
       }
       const client = await prisma.users.findFirst({ where: { id_user: BigInt(userId), type_user: 'client' } });
       if (!client) return res.status(200).json({ success: true, message: 'Sem dados' });
       appointments = await prisma.appointments.findMany({
-        where: { id_client: client.id_user },
+        where: { id_client: client.id_user, canceled_at: null },
         orderBy: { appointment_time: 'desc' },
         take: 50,
         include: {
@@ -148,7 +174,8 @@ router.get('/list', authenticateToken, async (req: AuthRequest, res) => {
           appointment_time: {
             gte: new Date(date + 'T00:00:00.000Z'),
             lt: new Date(date + 'T23:59:59.999Z')
-          }
+          },
+          canceled_at: null
         },
         include: {
           barber: { select: { name_user: true, email_user: true } },
@@ -166,7 +193,7 @@ router.get('/list', authenticateToken, async (req: AuthRequest, res) => {
         }
       };
       if (email_user) {
-  
+
         const user = await prisma.users.findFirst({ where: { email_user: String(email_user) } });
         if (user) {
           if (user.type_user === 'client') where.id_client = user.id_user;
@@ -174,7 +201,7 @@ router.get('/list', authenticateToken, async (req: AuthRequest, res) => {
         }
       }
       appointments = await prisma.appointments.findMany({
-        where,
+        where: { canceled_at: null },
         include: {
           barber: { select: { name_user: true, email_user: true } },
           speciality: { select: { nm_speciality: true } },

@@ -172,6 +172,7 @@ const NewAppointment: React.FC<NewAppointmentProps> = ({ role }) => {
             }
 
         } catch (error: unknown) {
+            console.error("Erro ao criar agendamento: ", error);
             alert("Erro ao criar agendamento");
         }
     };

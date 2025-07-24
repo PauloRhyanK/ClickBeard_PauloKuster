@@ -12,15 +12,17 @@ const ListAppointment = ({ role, email }: { role: string, email: string }) => {
     const [selectedDate, setSelectedDate] = useState<string>(new Date().toISOString().split('T')[0]);
 
     const handleCancelAppointment = async (hour: string, date: string, email_barber: string, email_client: string) => {
+        alert("Canceling appointment...");
         try {
             const response = await cancelAppointment(date, hour, email_barber, email_client);
             if (response.success !== true){
-                console.error("Error canceling appointment");
+                console.error("Error canceling appointment: " + JSON.stringify(response));
             }else {
                 setAppointments(prev => prev.filter(app => app.hour !== hour || app.date !== date || app.barber.email !== email_barber));
-                console.log("Appointment canceled successfully");   
+                alert("Appointment canceled successfully");
             }
         } catch (error) {
+            alert("Erro ao cancelar atendimento");
             console.error("Error canceling appointment:", error);
         }
     };
@@ -169,7 +171,7 @@ const ListAppointment = ({ role, email }: { role: string, email: string }) => {
                                 id="appointmentDate"
                                 value={selectedDate}
                                 onChange={(e) => setSelectedDate(e.target.value)}
-                            />
+                        />
                         </div>
                     </div>
 
@@ -191,7 +193,7 @@ const ListAppointment = ({ role, email }: { role: string, email: string }) => {
                                         {role === "admin" && (
                                             <>
                                                 <span>{appointment.barber.name}</span>
-                                                <strong className="close flex justify-end">X</strong>
+                                                <strong onClick={() => handleCancelAppointment(appointment.hour, appointment.date, appointment.barber.email, email)} className="close flex justify-end cursor-pointer">X</strong>
                                             </>
                                         )}
                                     </div>
@@ -216,7 +218,7 @@ const ListAppointment = ({ role, email }: { role: string, email: string }) => {
                                         {role === "admin" && (
                                             <>
                                                 <span>{appointment.barber.name}</span>
-                                                <strong className="close flex justify-end">X</strong>
+                                                <strong onClick={() => handleCancelAppointment(appointment.hour, appointment.date, appointment.barber.email, email)} className="close flex justify-end cursor-pointer">X</strong>
                                             </>
                                         )}
                                     </div>
@@ -241,7 +243,7 @@ const ListAppointment = ({ role, email }: { role: string, email: string }) => {
                                         {role === "admin" && (
                                             <>
                                                 <span>{appointment.barber.name}</span>
-                                                <strong className="close flex justify-end">X</strong>
+                                                <strong onClick={() => handleCancelAppointment(appointment.hour, appointment.date, appointment.barber.email, email)} className="close flex justify-end cursor-pointer">X</strong>
                                             </>
                                         )}
                                     </div>

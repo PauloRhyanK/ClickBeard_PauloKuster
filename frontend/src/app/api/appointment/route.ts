@@ -56,7 +56,8 @@ export async function POST(request: NextRequest) {
     } catch (error: unknown) {
         return NextResponse.json({ 
             success: false,
-            error: "Internal server error" 
+            error: "Internal server error: " + ( error ?? "Unknown error"),
+            debug: error
         }, { status: 500 });
     }
 }

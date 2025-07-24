@@ -17,9 +17,16 @@ export async function POST(request: NextRequest) {
                 error: "All fields are required"
             }, { status: 400 });
         }
+        
+        const requestData = {
+            date: date,
+            hour: hour,
+            email_barber: email_barber,
+            email_client: email_client
+        };
 
         const baseUrl = process.env.NEXT_PUBLIC_API_BASE_URL || '';
-        const response = await axios.post(`${baseUrl}/appointments/cancel`, body, {
+        const response = await axios.post(`${baseUrl}/appointments/cancel`, requestData, {
             headers: {
                 Authorization: `Bearer ${token}`,
                 'Content-Type': 'application/json'

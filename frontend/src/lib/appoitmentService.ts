@@ -76,6 +76,7 @@ export async function fetchNewAppointment(data: CreateAppointmentRequest): Promi
         });
         return response.data as CreateAppointmentData;
     } catch (error: unknown) {
+        console.error("Error creating appointment:", error);
         throw new Error("Falha ao criar agendamento");
     }
 }
@@ -121,7 +122,8 @@ export async function cancelAppointment(date: string, hour: string, email_barber
                 'Content-Type': 'application/json'
             }
         });
-        return response.data.success;
+        console.log("Response from cancel appointment:", response.data);
+        return response.data;
     } catch (error) {
         console.error("Error canceling appointment:", error);
         throw new Error("Failed to cancel appointment");
