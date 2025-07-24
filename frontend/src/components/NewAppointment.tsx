@@ -54,7 +54,7 @@ const NewAppointment: React.FC<NewAppointmentProps> = ({ role }) => {
     const getAllSpecialities = (barbersList: BarberSlot[]): string[] => {
         const allSpecs = new Set<string>();
         barbersList.map(barber => {
-            barber.specialities.forEach(spec => allSpecs.add(spec));
+            barber.specialities?.forEach(spec => allSpecs.add(spec));
         });
         return Array.from(allSpecs);
     };
