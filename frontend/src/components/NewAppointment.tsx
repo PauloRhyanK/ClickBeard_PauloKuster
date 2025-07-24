@@ -1,5 +1,5 @@
 import { fetchAvailableHours, fetchNewAppointment } from "@/lib/appoitmentService";
-import { BarberSlot, HourSlot, Client } from "@/types";
+import { BarberSlot, HourSlot, ClientsResponse } from "@/types";
 import { fetchClients,  } from "@/lib/clientService";
 import React, { useState, useEffect } from "react";
 import HoursApointment from "./HoursApointment";
@@ -15,7 +15,7 @@ const NewAppointment: React.FC<NewAppointmentProps> = ({ role }) => {
     const [allBarbers, setAllBarbers] = useState<BarberSlot[]>([]);
     const [specialities, setSpecialities] = useState<string[]>([]);
     const [date, setDate] = useState<Date>(new Date());
-    const [clients, setClients] = useState<Client[]>([]);
+    const [clients, setClients] = useState<ClientsResponse[]>([]);
 
     const [speciality, setSpeciality] = useState<string>("");
     const [selectedBarber, setSelectedBarber] = useState<string>("");
@@ -253,8 +253,8 @@ const NewAppointment: React.FC<NewAppointmentProps> = ({ role }) => {
                         >
                             <option value="">Selecione um cliente...</option>
                             {clients.map((clientItem, key) => (
-                                <option key={key} value={clientItem.id}>
-                                    {clientItem.name}
+                                <option key={key} value={clientItem.id_user}>
+                                    {clientItem.name_user}
                                 </option>
                             ))}
                         </select>

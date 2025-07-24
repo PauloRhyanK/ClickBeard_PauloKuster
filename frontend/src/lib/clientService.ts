@@ -1,7 +1,7 @@
 import axios from "axios";
-import { Client, ClientsResponse } from "@/types";
+import { ClientsResponse } from "@/types";
 
-export async function fetchClients(token: string): Promise<Client[]> {
+export async function fetchClients(token: string): Promise<ClientsResponse[]> {
     if (!token) {
         throw new Error("Token is required");
     }
@@ -14,12 +14,12 @@ export async function fetchClients(token: string): Promise<Client[]> {
             },
         });
 
-        const data = response.data as ClientsResponse;
+        const data = response.data as ClientsResponse[];
         
-        if (data.success) {
-            return data.clients || [];
+        if (data) {
+            return data || [];
         } else {
-            throw new Error(data.message || "Failed to fetch clients");
+            throw new Error("Failed to fetch clients");
         }
     } catch (error: unknown) {
         console.error("Error fetching clients:", error);

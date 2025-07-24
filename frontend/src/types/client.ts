@@ -1,12 +1,9 @@
-export interface Client {
-    id: string;
-    name: string;
-}
-
 export interface ClientsResponse {
-    success: boolean;
-    clients: Client[];
-    message?: string;
+    id_user: number;
+    name_user: string;
+    email_user: string;
+    age_user?: number;
+    created_at: string;
 }
 
 export interface ClientFormData {
