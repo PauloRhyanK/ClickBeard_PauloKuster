@@ -21,7 +21,7 @@ export async function GET(request: NextRequest) {
         if (response.status >= 200 && response.status < 300) {
             return NextResponse.json({
                 success: true,
-                clients: response.data.clients || response.data || [],
+                clients: response.data || [],
                 message: "Clients fetched successfully"
             });
         }

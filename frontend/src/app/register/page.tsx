@@ -3,6 +3,7 @@
 import axios from "axios";
 import Image from "next/image";
 import { use, useEffect, useState } from "react";
+import { ClientFormData } from "@/types/client";
 
 export default function Register() {
     const [formData, setFormData] = useState({
@@ -46,14 +47,14 @@ export default function Register() {
                 alert("Selecione o tipo de usuário");
                 return;
             }
-            alert("Registrando usuário...");
-            const payload: any = {
+            const payload: ClientFormData = {
                 name: formData.name.trim(),
                 email: formData.email.trim().toLowerCase(),
                 password: formData.password.trim(),
                 type: formData.type,
                 appointments: formData.appointments
             };
+            
             if (formData.date) {
                 payload.date = new Date(formData.date).toISOString();
                 payload.age = new Date().getFullYear() - new Date(formData.date).getFullYear();

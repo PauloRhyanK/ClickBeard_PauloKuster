@@ -8,3 +8,13 @@ export interface ClientsResponse {
     clients: Client[];
     message?: string;
 }
+
+export interface ClientFormData {
+    name: string;
+    email: string;
+    password: string;
+    type: string;
+    appointments: string[];
+    date?: string;
+    age?: number;
+}
